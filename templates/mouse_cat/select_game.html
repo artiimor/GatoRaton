@@ -1,0 +1,34 @@
+{% extends "mouse_cat/base.html" %}
+
+{% block content %}
+<div id="content">
+    <h1>Select game</h1>
+    <p>
+        {% if as_cat %}
+            Games as cat:
+            <ul>
+            {% for game in as_cat %}
+                <li> <a href="{% url 'select_game' game.id %}">{{ game }}</a></li>
+            {% endfor %}
+            </ul>
+        {%  else %}
+            No games as cat
+        {% endif %}
+    </p>
+
+    <p>
+        {% if as_mouse %}
+            Games as mouse:
+            <ul>
+            {% for game in as_mouse %}
+                <li> <a href="{% url 'select_game' game.id %}">{{ game }}</a></li>
+            {% endfor %}
+            </ul>
+        {%  else %}
+            No games as mouse
+        {% endif %}
+    </p>
+    
+    <p><a href="{% url 'landing' %}">Return to homepage</a></p>
+</div>
+{% endblock content %}

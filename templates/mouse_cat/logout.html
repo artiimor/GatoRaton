@@ -1,0 +1,9 @@
+{% extends "mouse_cat/base.html" %}
+
+{% block content %}
+<div id="content">
+    <h1>Logout</h1>
+    <p>Dear <b>{{ user }}</b>, you have been successfully logged out</p>
+    <p><a href="{% url 'landing' %}">Return to homepage</a></p>
+</div>
+{% endblock content %}

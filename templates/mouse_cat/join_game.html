@@ -1,0 +1,13 @@
+{% extends "mouse_cat/base.html" %}
+
+{% block content %}
+<div id="content">
+    <h1>Join game</h1>
+    {% if msg_error %}
+        <p class="error">ERROR: {{ msg_error }}</p>
+    {% else %}
+        <p><b>{{ game.mouse_user.username }}</b> succesfully joined to game <b>{{ game.id }}</b>. The game can start!!!</p>
+    {% endif %}
+    <p><a href="{% url 'landing' %}">Return to homepage</a></p>
+</div>
+{% endblock content %}

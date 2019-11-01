@@ -1,0 +1,56 @@
+{% extends "mouse_cat/base.html" %}
+
+{% block content %}
+<div id="content">
+    <h1>Play</h1>
+    <p>Game: <b>{{ game.id }}</b></p>
+    <form id="move_form" method="post" action="{% url 'move' %}">
+        {% csrf_token %}
+        <p>
+            Cats: <b>{{ game.cat_user.username }}</b>
+            {% if game.cat_user.id == request.user.id %}
+                <blockquote class="cat">
+                    {% if game.cat_turn %}
+                        {{ move_form }}
+                        <input type="submit" value="Move" />
+                    {% else %}
+                        Waiting for the mouse...
+                        <a style="margin-left:20px;font-weight:normal" href="{% url 'show_game' %}">Refresh</a>
+                    {% endif %}
+                </blockquote>
+            {% endif %}
+        </p>
+        <p>
+            Mouse: <b>{{ game.mouse_user.username }}</b>
+            {% if game.mouse_user.id == request.user.id %}
+                <blockquote class="mouse">
+                    {% if not game.cat_turn %}
+                        {{ move_form }}
+                        <input type="submit" value="Move" />
+                    {% else %}
+                        Waiting for the cat...
+                        <a style="margin-left:20px;font-weight:normal" href="{% url 'show_game' %}">Refresh</a>
+                    {% endif %}
+                </blockquote>
+            {% endif %}
+        </p>
+    </form>
+
+    {% if board %}
+        <p>Board: {{ board }}</p>
+        <table id="chess_board">
+        {% for item in board %}
+            {% if forloop.counter0|divisibleby:8 %}<tr>{% endif %}
+            <td id="cell_{{ forloop.counter0}}"" style='width:20px;border:1px solid #000000;text-align:center;'>
+                {% if item ==  0 %}   x
+                {% elif item == 1 %}  &#9922;
+                {% else %}  &#9920; {% endif %}
+            </td>
+            {% if forloop.counter|divisibleby:8 or forloop.last %}</tr>{% endif %}
+        {% endfor %}
+        </table>
+    {% endif %}
+
+    <p><a href="{% url 'landing' %}">Return to homepage</a></p>
+</div>
+{% endblock content %}

@@ -1,0 +1,20 @@
+{% extends "mouse_cat/base.html" %}
+
+{% load staticfiles %}
+
+{% block content %}
+<div id="content">
+    <h1>Service catalog</h1>
+
+    <ul>
+        <li><a href="{% url 'login' %}">Login</a></li>
+        <li><a href="{% url 'logout' %}">Logout</a></li>
+        <li><a href="{% url 'signup' %}">Signup</a></li>
+        <li><a href="{% url 'counter' %}">Counter</a></li>
+        <li><a href="{% url 'create_game' %}">Create game</a></li>
+        <li><a href="{% url 'join_game' %}">Join game</a></li>
+        <li><a href="{% url 'select_game' %}">Select game</a></li>
+        <li><a href="{% url 'show_game' %}">Show selected game and play</a></li>
+    </ul>
+</div>
+{% endblock content %}

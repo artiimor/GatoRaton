@@ -1,0 +1,41 @@
+{% load staticfiles %}
+<html>
+<head>
+    {% block extra_css %}
+        <link rel="stylesheet" type="text/css" href="{% static 'css/style.css' %}"/>
+    {% endblock extra_css %}
+
+    {% block extra_js %}
+    
+    {% endblock extra_js %}
+
+    {% block extra_head %}
+    
+    {% endblock extra_head %}
+    <title>{% block title %}PSI 2019-2020: Example of application{% endblock %}</title>
+</head>
+
+<body id="body">
+    <div id="totalheader">
+        <div id="title">
+            {% block atitle %}<h1>Mouse vs. Cats application</h1>{% endblock atitle %}
+        </div>
+
+        <div id="header">
+            {% if request.user.is_authenticated %}
+                Welcome <span class="username">{{ request.user.username }}</span>!
+            {% endif %}
+        </div>
+    </div>
+
+    <hr/>
+
+    {% block content %}
+    {% endblock content %}
+
+    <hr/>
+
+    {% block footer %}
+    {% endblock footer %}
+</body>
+</html>
