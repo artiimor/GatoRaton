@@ -6,8 +6,8 @@ from django.contrib.auth.models import User
 from django.core.exceptions import ValidationError
 from django.test import TestCase
 
-from . import tests
-from .models import Counter, Game, GameStatus, Move
+import tests
+from datamodel.models import Counter, Game, GameStatus, Move
 
 
 class GameModelTests(tests.BaseModelTest):

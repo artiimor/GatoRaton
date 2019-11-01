@@ -4,7 +4,7 @@
 
 from django.core.exceptions import ValidationError
 
-from datamodel import tests
+import tests
 from datamodel.models import Game, GameStatus, Move
 
 
