@@ -12,18 +12,10 @@ class GameStatus(models.Model):
     FINISHED = 2
 
 
-class User(models.Model):
-    # link UserProfile to a User model instance
-    user = models.OneToOneField(User, on_delete=models.CASCADE)
-
-    def __str__(self):
-        return self.user.username
-
-
 class Game(models.Model):
     # cat and mouse are foreign keys of a user
-    cat_user = models.ForeignKey(User, on_delete=models.CASCADE, related_name="games")
-    mouse_user = models.ForeignKey(User, on_delete=models.CASCADE)
+    cat_user = models.ForeignKey(User, on_delete=models.CASCADE, related_name="games", null=False)
+    mouse_user = models.ForeignKey(User,on_delete=models.CASCADE, null=True, blank=True, related_name='gamemouseUsers')
 
     # The cats and mouse are ints with the position
     # range is [0, 63]
