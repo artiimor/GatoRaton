@@ -1,7 +1,7 @@
 from django.http import HttpResponseForbidden
 from django.shortcuts import render
 
-# from datamodel import constants
+from datamodel import constants
 
 
 def anonymous_required(f):
