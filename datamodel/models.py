@@ -41,6 +41,7 @@ class Game(models.Model):
         # Status validation
         if self.mouse_user is None and self.status != GameStatus.CREATED:
             raise ValidationError(MSG_ERROR_GAMESTATUS)
+            return False
         if self.mouse_user is None:
             self.status = GameStatus.CREATED
         elif self.status != GameStatus.FINISHED:
@@ -51,11 +52,12 @@ class Game(models.Model):
             col = int(cell%8)
             if (row%2 != col%2):
                 raise ValidationError(MSG_ERROR_INVALID_CELL)
+                return False
         return True
 
     def save(self, *args, **kwargs):
-        self.validate()
-        super(Game, self).save(*args, **kwargs)
+        if self.validate() == True:
+            super(Game, self).save(*args, **kwargs)
 
     def get_array_positions(self):
         return [self.cat1, self.cat2, self.cat3, self.cat4, self.mouse]
@@ -79,6 +81,16 @@ class Game(models.Model):
 class Move(models.Model):
     origin = models.IntegerField(null=False)
     target = models.IntegerField(null=False)
-    game = models.ForeignKey(Game, on_delete=models.CASCADE)
+    game = models.ForeignKey(Game, on_delete=models.CASCADE, related_name="moves")
     player = models.ForeignKey(User, on_delete=models.CASCADE)
-    date = models.DateField(null=False)
+    date = models.DateField(auto_now=True)
+
+    def validate(self):
+        if self.game.status != GameStatus.ACTIVE:
+            raise ValidationError(MSG_ERROR_MOVE)
+            return False
+        return True
+
+    def save(self, *args, **kwargs):
+        if self.validate() == True:
+            super(Move, self).save(*args, **kwargs)
