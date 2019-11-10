@@ -49,6 +49,9 @@ class Game(models.Model):
     def get_array_positions(self):
         return [self.cat1, self.cat2, self.cat3, self.cat4, self.mouse]
 
+    def __str__(self):
+        return "Juego: "+str(self.id) +"\nGatos: "+str(self.cat1)+" "+str(self.cat2)+" "+str(self.cat3)+" "+str(self.cat4)+"\nRaton: "+str(self.mouse)
+
 
 class Move(models.Model):
     origin = models.IntegerField(null=False)
