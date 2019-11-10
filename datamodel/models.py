@@ -1,6 +1,6 @@
 from django.core.exceptions import ValidationError, ObjectDoesNotExist
 from django.db import models
-from django.contrib.auth.models import User, UserManager
+from django.contrib.auth.models import User
 from django.core.validators import MaxValueValidator, MinValueValidator
 
 MSG_ERROR_INVALID_CELL = "Invalid cell for a cat or the mouse|Gato o ratón en posición no válida"
@@ -96,8 +96,10 @@ class Move(models.Model):
             super(Move, self).save(*args, **kwargs)
 
 
-class CounterManager(models.Manager):
+# This class work for Counter.objects. Making it a singleton class
+class SingletonCounter(models.Manager):
 
+    # You can't create it
     def create(self, *args, **kwargs):
         raise ValidationError(MSG_ERROR_NEW_COUNTER)
 
@@ -105,11 +107,12 @@ class CounterManager(models.Manager):
         try:
             counter = Counter.objects.get(pk=1)
             counter.value += 1
-            Counter.objects.all().filter(pk=1).update(value=singl.value)
+            Counter.objects.all().filter(pk=1).update(value=counter.value)
             return counter.value
-
+        # If the singleton doesn't exist we create it
         except ObjectDoesNotExist:
-            counter = Counter(value=1)
+            # Initial value is 1 because we are increasing the counter
+            counter = Counter(value=1, pk=1)
             counter.save(priv=True)
             return counter.value
 
@@ -119,14 +122,15 @@ class CounterManager(models.Manager):
             return counter[0].value
         else:
             counter = Counter()
-            counter.pk = 1
+            counter.id = 1
             counter.save(priv=True)
             return counter.value
+
 
 class Counter(models.Model):
     value = models.IntegerField(null=False, default=0)
 
-    objects = CounterManager()
+    objects = SingletonCounter()
 
     def save(self, *args, priv=False, **kwargs):
         if priv:
