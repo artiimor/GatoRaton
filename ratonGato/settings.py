@@ -77,7 +77,7 @@ WSGI_APPLICATION = 'ratonGato.wsgi.application'
 DATABASES = {
     'default': {
         'ENGINE': 'django.db.backends.postgresql',
-        'NAME': 'psi',
+        'NAME': 'ratongato',
         'USER': 'alumnodb',
         'PASSWORD': 'alumnodb',
         'HOST': 'localhost',
