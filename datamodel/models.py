@@ -1,9 +1,7 @@
-from django.core.exceptions import ValidationError
+from django.core.exceptions import ValidationError, ObjectDoesNotExist
 from django.db import models
-from django.template.defaultfilters import slugify
-from django.contrib.auth.models import User
+from django.contrib.auth.models import User, UserManager
 from django.core.validators import MaxValueValidator, MinValueValidator
-from enum import Enum
 
 MSG_ERROR_INVALID_CELL = "Invalid cell for a cat or the mouse|Gato o ratón en posición no válida"
 MSG_ERROR_GAMESTATUS = "Game status not valid|Estado no válido"
@@ -27,11 +25,16 @@ class Game(models.Model):
     # The cats and mouse are ints with the position
     # range is [0, 63]
     # default values are the initial position
-    cat1 = models.IntegerField(null=False, default=0, validators=[MaxValueValidator(MAX_CELL), MinValueValidator(MIN_CELL)])
-    cat2 = models.IntegerField(null=False, default=2, validators=[MaxValueValidator(MAX_CELL), MinValueValidator(MIN_CELL)])
-    cat3 = models.IntegerField(null=False, default=4, validators=[MaxValueValidator(MAX_CELL), MinValueValidator(MIN_CELL)])
-    cat4 = models.IntegerField(null=False, default=6, validators=[MaxValueValidator(MAX_CELL), MinValueValidator(MIN_CELL)])
-    mouse = models.IntegerField(null=False, default=59, validators=[MaxValueValidator(MAX_CELL), MinValueValidator(MIN_CELL)])
+    cat1 = models.IntegerField(null=False, default=0,
+                               validators=[MaxValueValidator(MAX_CELL), MinValueValidator(MIN_CELL)])
+    cat2 = models.IntegerField(null=False, default=2,
+                               validators=[MaxValueValidator(MAX_CELL), MinValueValidator(MIN_CELL)])
+    cat3 = models.IntegerField(null=False, default=4,
+                               validators=[MaxValueValidator(MAX_CELL), MinValueValidator(MIN_CELL)])
+    cat4 = models.IntegerField(null=False, default=6,
+                               validators=[MaxValueValidator(MAX_CELL), MinValueValidator(MIN_CELL)])
+    mouse = models.IntegerField(null=False, default=59,
+                                validators=[MaxValueValidator(MAX_CELL), MinValueValidator(MIN_CELL)])
 
     # if True it is cat turn. if False it is mouse turn. Default the cat starts
     cat_turn = models.BooleanField(null=False, default=True)
@@ -41,7 +44,6 @@ class Game(models.Model):
         # Status validation
         if self.mouse_user is None and self.status != GameStatus.CREATED:
             raise ValidationError(MSG_ERROR_GAMESTATUS)
-            return False
         if self.mouse_user is None:
             self.status = GameStatus.CREATED
         elif self.status != GameStatus.FINISHED:
@@ -49,14 +51,13 @@ class Game(models.Model):
         # Position validation
         for cell in self.get_array_positions():
             row = int(cell/8)
-            col = int(cell%8)
-            if (row%2 != col%2):
+            col = int(cell % 8)
+            if row % 2 != col % 2:
                 raise ValidationError(MSG_ERROR_INVALID_CELL)
-                return False
         return True
 
     def save(self, *args, **kwargs):
-        if self.validate() == True:
+        if self.validate() is True:
             super(Game, self).save(*args, **kwargs)
 
     def get_array_positions(self):
@@ -88,9 +89,51 @@ class Move(models.Model):
     def validate(self):
         if self.game.status != GameStatus.ACTIVE:
             raise ValidationError(MSG_ERROR_MOVE)
-            return False
         return True
 
     def save(self, *args, **kwargs):
-        if self.validate() == True:
+        if self.validate() is True:
             super(Move, self).save(*args, **kwargs)
+
+
+class CounterManager(models.Manager):
+
+    def create(self, *args, **kwargs):
+        raise ValidationError(MSG_ERROR_NEW_COUNTER)
+
+    def inc(self):
+        try:
+            counter = Counter.objects.get(pk=1)
+            counter.value += 1
+            Counter.objects.all().filter(pk=1).update(value=singl.value)
+            return counter.value
+
+        except ObjectDoesNotExist:
+            counter = Counter(value=1)
+            counter.save(priv=True)
+            return counter.value
+
+    def get_current_value(self):
+        counter = Counter.objects.all().filter(pk=1)
+        if counter:
+            return counter[0].value
+        else:
+            counter = Counter()
+            counter.pk = 1
+            counter.save(priv=True)
+            return counter.value
+
+class Counter(models.Model):
+    value = models.IntegerField(null=False, default=0)
+
+    objects = CounterManager()
+
+    def save(self, *args, priv=False, **kwargs):
+        if priv:
+            super(Counter, self).save(*args, **kwargs)
+        else:
+            raise ValidationError(MSG_ERROR_NEW_COUNTER)
+
+    def __str__(self):
+        return "The counter id is:: "+str(self.id)+"\nAnd the value is: "+str(self.value)
+
