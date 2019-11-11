@@ -65,7 +65,7 @@ def login_service(request):
 
 
 @login_required
-def user_logout(request):
+def logout_service(request):
     # Also the same in tango with django
     logout(request)
 
