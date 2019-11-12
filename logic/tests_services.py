@@ -1,7 +1,7 @@
 """
 @author: rlatorre
 
-ChangeLog: 
+ChangeLog:
 2019 Nov 8 (@author rmarabini): change TestCase by TransactionTestCase
 When runing the test, TestCase creates a transaction and all test code are now under a "transaction block". At the end of the test, TestCase will rollback all things to keep your DB clean. When using  posgres as database AND accesing functions that require login without login in first, the database connection is disconected and the rollback fails producing different errors in the code. TransactionTestCase instead of using a rollback deletes the tables are recreates them. This is an slower approach but more robust.
 """
@@ -38,32 +38,32 @@ TEST_PASSWORD_2 = "kj83jfbhg"
 
 USER_SESSION_ID = "_auth_user_id"
 
-LANDING_PAGE = "landing"
+LANDING_PAGE = "logic:landing"
 LANDING_TITLE = r"<h1>Service catalog</h1>|<h1>Servicios</h1>"
 
 ANONYMOUSE_ERROR = "Anonymous required"
 ERROR_TITLE = "<h1>Error</h1>"
 
-LOGIN_SERVICE = "login"
-LOGIN_ERROR = "login_error"
+LOGIN_SERVICE = "logic:login"
+LOGIN_ERROR = "logic:login_error"
 LOGIN_TITLE = "<h1>Login</h1>"
 
-LOGOUT_SERVICE = "logout"
+LOGOUT_SERVICE = "logic:logout"
 
-SIGNUP_SERVICE = "signup"
+SIGNUP_SERVICE = "logic:signup"
 SIGNUP_ERROR_PASSWORD = "signup_error1"
 SIGNUP_ERROR_USER = "signup_error2"
 SIGNUP_ERROR_AUTH_PASSWORD = "signup_error3"
 SIGNUP_TITLE = r"<h1>Signup user</h1>|<h1>Alta de usuarios</h1>"
 
-COUNTER_SERVICE = "counter"
+COUNTER_SERVICE = "logic:counter"
 COUNTER_SESSION_VALUE = "session_counter"
 COUNTER_GLOBAL_VALUE = "global_counter"
 COUNTER_TITLE = r"<h1>Request counters</h1>|<h1>Contadores de peticiones</h1>"
 
-CREATE_GAME_SERVICE = "create_game"
+CREATE_GAME_SERVICE = "logic:create_game"
 
-JOIN_GAME_SERVICE = "join_game"
+JOIN_GAME_SERVICE = "logic:join_game"
 JOIN_GAME_ERROR_NOGAME = "join_game_error"
 JOIN_GAME_TITLE = r"<h1>Join game</h1>|<h1>Unirse a juego</h1>"
 

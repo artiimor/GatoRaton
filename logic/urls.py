@@ -10,5 +10,5 @@ urlpatterns = [
     url(r'^login/$', views.login_service, name='login'),
     url('logout/', views.logout_service, name='logout'),
     url('signup/', views.signup_service, name='signup'),
-
+    url('counter/', views.counter_service, name='counter'),
 ]

@@ -30,7 +30,6 @@ def index(request):
     return render(request, "mouse_cat/index.html")
 
 
-@anonymous_required
 def login_service(request):
     # It is exactly the same we used in tango with django :)
 
@@ -69,7 +68,7 @@ def logout_service(request):
     # Also the same in tango with django
     logout(request)
 
-    return redirect(reverse('rango:index'))
+    return redirect(reverse('logic:index'))
 
 
 @anonymous_required
@@ -98,7 +97,7 @@ def signup_service(request):
         user_form = User()
 
     # Of course we have to render the template
-    return render(request, 'mouse_cat/singup.html', {'user_form': user_form})
+    return render(request, 'mouse_cat/signup.html', {'user_form': user_form})
 
 
 def counter_service(request):
@@ -115,8 +114,4 @@ def counter_service(request):
     counter_global = Counter.value
     context_dict['counter_global'] = counter_global
 
-    return render(request, 'mouse_cat/counter', context_dict)
-
-
-
-
+    return render(request, 'mouse_cat/counter.html', context_dict)

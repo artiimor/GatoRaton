@@ -4,13 +4,13 @@
 <div id="content">
     <h1>Login</h1>
     Log in to continue:
-    <form id="login_form" method="post" action="{% url 'login' %}">
+    <form id="login_form" method="post" action="{% url 'logic:login' %}">
         {% csrf_token %}
         {{ user_form.as_p }}<br/>
         <input type="hidden" name="return_service" value="{{ return_service }}" />
         <input type="submit" value="Log-In" />
     </form>
 
-    <p><a href="{% url 'landing' %}">Return to homepage</a></p>
+    <p><a href="{% url 'logic:landing' %}">Return to homepage</a></p>
 </div>
 {% endblock content %}
