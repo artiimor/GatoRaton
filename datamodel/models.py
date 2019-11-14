@@ -79,6 +79,19 @@ class Game(models.Model):
         return status + cat + mouse
 
 
+"""
+    The cells are:
+    |xx|57|xx|59|xx|61|xx|63|
+    |48|xx|50|xx|52|xx|54|xx|
+    |xx|41|xx|43|xx|45|xx|47|
+    |32|xx|34|xx|36|xx|38|xx|
+    |xx|25|xx|27|xx|29|xx|31|
+    |16|xx|18|xx|20|xx|22|xx|
+    |xx|09|xx|11|xx|13|xx|15|
+    |00|xx|02|xx|04|xx|06|xx|
+"""
+
+
 class Move(models.Model):
     origin = models.IntegerField(null=False)
     target = models.IntegerField(null=False)
