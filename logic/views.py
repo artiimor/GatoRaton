@@ -1,4 +1,4 @@
-from django.http import HttpResponseForbidden
+from django.http import HttpResponseForbidden, HttpResponseNotFound
 from django.http import HttpResponse
 from django.shortcuts import render
 from django.shortcuts import redirect
@@ -8,6 +8,7 @@ from django.contrib.auth.decorators import login_required
 
 from datamodel import constants
 from datamodel.models import Game, Move, Counter, User
+from logic.forms import MoveForm
 
 
 def anonymous_required(f):
@@ -201,12 +202,26 @@ def show_game_service(request):
     return render(request, "mouse_cat/game.html", context_dict)
 
 
+@login_required
 def move_service(request):
     context_dict = {}
 
-    # If we don't know the user render login
-    if 'user' not in request.session:
-        return render(request, 'mouse_cat/login.html')
+    # Check if there's a user
+    if not request.user:
+        redirect(reverse('mouse_cat:login'))
 
+    player = request.user
 
+    if 'game_id' in request.session.keys():
+        game_id = request.session['game_id']
 
+        if request.method == 'POST':
+            movement = MoveForm(request.POST)
+            game = Game.objects.get(id=game_id)
+
+            Move.objects.create(game=game, player=player,
+                                origin=movement.data['origin'], target=movement.data['target'])
+
+            return redirect(reverse('show_game'))
+
+    return HttpResponseNotFound('<h1>There was a problem</h1>')
