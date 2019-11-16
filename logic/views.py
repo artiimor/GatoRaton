@@ -51,7 +51,7 @@ def logout_service(request):
     # Also the same in tango with django
     logout(request)
 
-    return redirect(reverse('logic:index'))
+    return redirect(reverse('index'))
 
 
 @anonymous_required
@@ -129,7 +129,7 @@ def select_game_service(request):
         game_id = request.POST.get('game_id')
         request.session['game'] = Game.object.filter(id=game_id)
 
-        return redirect(reverse('logic:show_game'))
+        return redirect(reverse('show_game'))
 
     # if method is get we show all the games
     user = request.user

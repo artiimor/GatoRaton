@@ -38,49 +38,49 @@ TEST_PASSWORD_2 = "kj83jfbhg"
 
 USER_SESSION_ID = "_auth_user_id"
 
-LANDING_PAGE = "logic:landing"
+LANDING_PAGE = "landing"
 LANDING_TITLE = r"<h1>Service catalog</h1>|<h1>Servicios</h1>"
 
 ANONYMOUSE_ERROR = "Anonymous required"
 ERROR_TITLE = "<h1>Error</h1>"
 
-LOGIN_SERVICE = "logic:login"
-LOGIN_ERROR = "logic:login_error"
+LOGIN_SERVICE = "login"
+LOGIN_ERROR = "login_error"
 LOGIN_TITLE = "<h1>Login</h1>"
 
-LOGOUT_SERVICE = "logic:logout"
+LOGOUT_SERVICE = "logout"
 
-SIGNUP_SERVICE = "logic:signup"
+SIGNUP_SERVICE = "signup"
 SIGNUP_ERROR_PASSWORD = "signup_error1"
 SIGNUP_ERROR_USER = "signup_error2"
 SIGNUP_ERROR_AUTH_PASSWORD = "signup_error3"
 SIGNUP_TITLE = r"<h1>Signup user</h1>|<h1>Alta de usuarios</h1>"
 
-COUNTER_SERVICE = "logic:counter"
+COUNTER_SERVICE = "counter"
 COUNTER_SESSION_VALUE = "session_counter"
 COUNTER_GLOBAL_VALUE = "global_counter"
 COUNTER_TITLE = r"<h1>Request counters</h1>|<h1>Contadores de peticiones</h1>"
 
-CREATE_GAME_SERVICE = "logic:create_game"
+CREATE_GAME_SERVICE = "create_game"
 
-JOIN_GAME_SERVICE = "logic:join_game"
+JOIN_GAME_SERVICE = "join_game"
 JOIN_GAME_ERROR_NOGAME = "join_game_error"
 JOIN_GAME_TITLE = r"<h1>Join game</h1>|<h1>Unirse a juego</h1>"
 
 CLEAN_SERVICE = "clean_db"
 CLEAN_TITLE = r"<h1>Clean orphan games</h1>|<h1>Borrar juegos huérfanos</h1>"
 
-SELECT_GAME_SERVICE = "logic:select_game"
+SELECT_GAME_SERVICE = "select_game"
 SELECT_GAME_ERROR_NOCAT = "select_game_error1"
 SELECT_GAME_ERROR_NOMOUSE = "select_game_error2"
 SELECT_GAME_TITLE = r"<h1>Select game</h1>|<h1>Seleccionar juego</h1>"
 
-SHOW_GAME_SERVICE = "logic:show_game"
+SHOW_GAME_SERVICE = "show_game"
 PLAY_GAME_MOVING = "play_moving"
 PLAY_GAME_WAITING = "play_waiting"
 SHOW_GAME_TITLE = r"<h1>Play</h1>|<h1>Jugar</h1>"
 
-MOVE_SERVICE = "logic:move"
+MOVE_SERVICE = "move"
 
 SERVICE_DEF = {
     LANDING_PAGE: {
