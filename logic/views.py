@@ -8,6 +8,7 @@ from django.contrib.auth.decorators import login_required
 
 from datamodel import constants
 from datamodel.models import Game, Move, Counter, User
+from logic.forms import SignupForm, LogInForm
 
 
 def anonymous_required(f):
@@ -30,37 +31,19 @@ def index(request):
     return render(request, "mouse_cat/index.html")
 
 
+@anonymous_required
 def login_service(request):
-    # It is exactly the same we used in tango with django :)
-
-    # If its a post we pull out the relevant information
+    user_form = LogInForm()
     if request.method == 'POST':
-        # Get the username and password
-        username = request.POST.get('username')
-        password = request.POST.get('password')
+        user_form = LogInForm(data=request.POST)
+        if user_form.is_valid():
+            user = authenticate(username=request.POST.get('username'), password=request.POST.get('password'))
+            login(request, user)
+            request.session['counter'] = 0
+            request.session.modified = True
+            return redirect(reverse('index'))
 
-        # and autenticate it. Djando has his own method
-        user = authenticate(username=username, password=password)
-
-        # if everything went well
-        if user:
-            # If the acount is active
-            if user.is_active:
-                # We send the user to the main page
-                login(request, user)
-                return redirect(reverse('logic:index'))
-            else:
-                # The account is inactive
-                return HttpResponse("Your Cat account is disabled")
-
-        else:
-            # Bad login information
-            print("invalid login detains: {0}, {1}".format(username, password))
-            return HttpResponse("Invalid login details supplied")
-
-    # If the request is not a post then we render the login template
-    else:
-        return render(request, 'mouse_cat/login.html')
+    return render(request, 'mouse_cat/login.html', {'user_form': user_form})
 
 
 @login_required
@@ -73,30 +56,19 @@ def logout_service(request):
 
 @anonymous_required
 def signup_service(request):
-
-    # This is even easies that the tango with django's one
+    user_form = SignupForm()
     if request.method == 'POST':
-
-        user_form = User(data=request.POST)
-
-        # If the two forms are valid
+        user_form = SignupForm(data=request.POST)
         if user_form.is_valid():
             # Save the user onto the database
             user = user_form.save()
-
-            # Set the password and stores it
-            user.set_password(user.password)
-            user.save()
-
-        else:
-            # there has been some kind of error
-            print(user_form.errors)
-
-    else:
-        # Not a post, so render the forms for allowing the registration
-        user_form = User()
-
-    # Of course we have to render the template
+            # Signup also logs the user in
+            authenticate(username=user_form.cleaned_data.get('username'),
+                        password=user_form.cleaned_data.get('password'))
+            login(request, user)
+            request.session['counter'] = 0
+            return render(request, 'mouse_cat/signup.html')
+    # Render template. Two cases: GET or user_form not valid
     return render(request, 'mouse_cat/signup.html', {'user_form': user_form})
 
 
