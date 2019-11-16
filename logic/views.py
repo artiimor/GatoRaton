@@ -125,14 +125,14 @@ def join_game_service(request):
 def select_game_service(request, game_id=-1):
     context_dict = {}
 
+    user = request.user
+
     # Movida mazo cutre con game_id
     # The get in a bad way
     if game_id == -1:
         # if method is get we show all the games
-        user = request.user
-        as_cat = Game.objects.filter(cat_user=user)
-
-        as_mouse = Game.objects.filter(mouse_user=user)
+        as_cat = Game.objects.filter(cat_user=user, status=GameStatus.ACTIVE)
+        as_mouse = Game.objects.filter(mouse_user=user, status=GameStatus.ACTIVE)
 
         context_dict['as_cat'] = as_cat
         context_dict['as_mouse'] = as_mouse
@@ -141,10 +141,10 @@ def select_game_service(request, game_id=-1):
 
     # POST in a bad way
     game = Game.objects.filter(id=game_id).first()
-    if not game or game.status == GameStatus.CREATED:
+    if not game or game.status != GameStatus.ACTIVE:
         return HttpResponseNotFound(constants.ERROR_NOT_FOUND)
     else:
-        if game.cat_user == request.user or game.mouse_user == request.user:
+        if game.cat_user == user or game.mouse_user == user:
             request.session['game_id'] = game.id
             return redirect(reverse('show_game'))
 
@@ -157,24 +157,22 @@ def show_game_service(request):
     context_dict = {}
 
     # OJO: Se queda siempre en este control
-    if 'game' not in request.session:
+    if 'game_id' not in request.session:
         return HttpResponse("<h1>Play</h1>No game...")
-        
-    game = request.session['game']
-    user = request.session['user']
+
+    game = Game.objects.get(id=request.session['game_id'])
 
     game_cells = []
-    ocupped_cells = game.get_array_positions()
-    mouse_cell = ocupped_cells[-1]
+    cat_cells = [game.cat1, game.cat2, game.cat3, game.cat4]
+    mouse_cell = game.mouse
 
-    for i in range(0,64):
+    for i in range(0, 64):
         if i == mouse_cell:
-            game_cells[i] = -1
-            {'game': game}
-        elif i in ocupped_cells:
-            game_cells[i] = 1
+            game_cells.append(-1)
+        elif i in cat_cells:
+            game_cells.append(1)
         else:
-            game_cells[i] = 0
+            game_cells.append(0)
 
     context_dict['game'] = game
     context_dict['board'] = game_cells
@@ -188,7 +186,7 @@ def move_service(request):
 
     # Check if there's a user
     if not request.user:
-        redirect(reverse('mouse_cat:login'))
+        redirect(reverse('login'))
 
     player = request.user
 
@@ -198,10 +196,11 @@ def move_service(request):
         if request.method == 'POST':
 
             movement = MoveForm(request.POST)
-            game = Game.objects.get(id=game_id)
-            Move.objects.create(game=game, player=player,
-                                origin=movement.data['origin'], target=movement.data['target'])
+            if movement.is_valid():
+                game = Game.objects.get(id=game_id)
+                Move.objects.create(game=game, player=player,
+                                    origin=movement.data['origin'], target=movement.data['target'])
 
-            return redirect(reverse('show_game'),)
+                return redirect(reverse('show_game'))
 
-    return HttpResponseNotFound('<h1>There was a problem</h1>')
+    return HttpResponseNotFound(constants.ERROR_NOT_FOUND)
