@@ -146,10 +146,10 @@ def select_game_service(request):
 def show_game_service(request):
     context_dict = {}
 
-    # If we don't know the user render login
-    #if 'user' not in request.session:
-    #    return render(request, 'mouse_cat/login.html')
-
+    # OJO: Se queda siempre en este control
+    if 'game' not in request.session:
+        return HttpResponse("<h1>Play</h1>No game...")
+        
     game = request.session['game']
     user = request.session['user']
 
