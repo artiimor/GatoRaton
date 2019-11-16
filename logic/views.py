@@ -81,7 +81,6 @@ def counter_service(request):
         request.session['counter'] += 1
 
     counter_session = request.session['counter']
-    print(Counter.objects)
     counter_global = Counter.objects.inc()
 
     return render(request, 'mouse_cat/counter.html',

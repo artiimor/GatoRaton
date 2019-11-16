@@ -251,13 +251,9 @@ class Move(models.Model):
 # This class work for Counter.objects. Making it a singleton class
 class SingletonCounter(models.Manager):
 
-    # You can't create it
-    def create(self, *args, **kwargs):
-        raise ValidationError(MSG_ERROR_NEW_COUNTER)
-
     def inc(self):
         try:
-            counter = Counter.objects()
+            counter = Counter.objects.get(pk=1)
             counter.value += 1
             Counter.objects.all().filter(pk=1).update(value=counter.value)
             return counter.value
