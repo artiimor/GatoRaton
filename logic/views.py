@@ -5,6 +5,7 @@ from django.shortcuts import redirect
 from django.urls import reverse
 from django.contrib.auth import authenticate, login, logout
 from django.contrib.auth.decorators import login_required
+from django.core.exceptions import ValidationError
 
 from datamodel import constants
 from datamodel.models import Game, Move, Counter, User, GameStatus
@@ -169,7 +170,7 @@ def show_game_service(request):
 
     context_dict['game'] = game
     context_dict['board'] = game.get_game_cells()
-    context_dict['move_form'] = MoveForm(game=game, player=request.user)
+    context_dict['move_form'] = MoveForm()
 
     return render(request, "mouse_cat/game.html", context_dict)
 
@@ -189,10 +190,14 @@ def move_service(request):
         game = Game.objects.get(id=game_id)
 
         if request.method == 'POST':
-            movement = MoveForm(request.POST, game=game, player=player)
-            #I'd display the error BUT I CAN'T TOUCH THE TEMPLATE so screw it
-            if not movement.is_valid():
-                pass
+            movement = MoveForm(request.POST)
+            if movement.is_valid():
+                try:
+                    Move.objects.create(game=game, player=player, origin=int(movement.data['origin']), target=int(movement.data['target']))
+                except(ValidationError):
+                    print("Error: Invalid move")
+            else:
+                print("Error: Invalid move")
             return redirect(reverse('show_game'))
 
     return HttpResponseNotFound(constants.ERROR_NOT_FOUND)
