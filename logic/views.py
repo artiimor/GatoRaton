@@ -101,23 +101,24 @@ def create_game_service(request):
 
 @login_required
 def join_game_service(request):
-    context_dict = {}
 
-    # Same that in test_query
-    game_aux = Game.objects.filter(mouse_user=None)
-    game = game_aux[0]
+    #If there are no games to join, render error message
+    if Game.objects.count() == 0:
+        return render(request, "mouse_cat/join_game.html", {'msg_error': "There is no available games"})
 
-    for g in game_aux:
-        if g.id < game.id:
-            game = g
+    #Get game with greater id
+    games = Game.objects.filter(mouse_user=None)
+    id_game = max((game.id for game in list(filter(lambda g: g.cat_user != request.user, games))), default=None)
+    if id_game is None:
+        return render(request, "mouse_cat/join_game.html", {'msg_error': "There is no available games"})
 
-    # game is the game with less id
+    game = Game.objects.get(id=id_game)
+
+    #User joins the game
     game.mouse_user = request.user
     game.save()
 
-    context_dict['game'] = game
-
-    return render(request, "mouse_cat/join_game.html", context_dict)
+    return render(request, "mouse_cat/join_game.html", {'game': game})
 
 
 @login_required
