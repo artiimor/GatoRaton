@@ -160,25 +160,17 @@ def show_game_service(request):
 
     # OJO: Se queda siempre en este control
     if 'game_id' not in request.session:
-        return HttpResponse("<h1>Play</h1>No game...")
+        return HttpResponse("<h1>Play</h1>No game selected.")
 
     game = Game.objects.get(id=request.session['game_id'])
-
-    game_cells = []
-    cat_cells = [game.cat1, game.cat2, game.cat3, game.cat4]
-    mouse_cell = game.mouse
-
-    for i in range(0, 64):
-        if i == mouse_cell:
-            game_cells.append(-1)
-        elif i in cat_cells:
-            game_cells.append(1)
-        else:
-            game_cells.append(0)
+    if game.mouse_is_trapped():
+        return HttpResponse("<h1>Play</h1><p>Game Finished!<br>Cats win!</p>")
+    if game.mouse_at_top():
+        return HttpResponse("<h1>Play</h1><p>Game Finished!<br>Mouse wins!</p>")
 
     context_dict['game'] = game
-    context_dict['board'] = game_cells
-    context_dict['move_form'] = MoveForm(game=game)
+    context_dict['board'] = game.get_game_cells()
+    context_dict['move_form'] = MoveForm(game=game, player=request.user)
 
     return render(request, "mouse_cat/game.html", context_dict)
 
@@ -195,15 +187,13 @@ def move_service(request):
 
     if 'game_id' in request.session.keys():
         game_id = request.session['game_id']
+        game = Game.objects.get(id=game_id)
 
         if request.method == 'POST':
-
-            movement = MoveForm(request.POST)
-            if movement.is_valid():
-                game = Game.objects.get(id=game_id)
-                Move.objects.create(game=game, player=player,
-                                    origin=movement.data['origin'], target=movement.data['target'])
-
-                return redirect(reverse('show_game'))
+            movement = MoveForm(request.POST, game=game, player=player)
+            #I'd display the error BUT I CAN'T TOUCH THE TEMPLATE so screw it
+            if not movement.is_valid():
+                pass
+            return redirect(reverse('show_game'))
 
     return HttpResponseNotFound(constants.ERROR_NOT_FOUND)

@@ -40,6 +40,15 @@ class Game(models.Model):
     cat_turn = models.BooleanField(null=False, default=True)
     status = models.IntegerField(null=False, default=GameStatus.CREATED)
 
+    def cell_is_valid(self, cell):
+        if cell < self.MIN_CELL or cell > self.MAX_CELL:
+            return False
+        row = int(cell) / 8
+        col = int(cell) % 8
+        if int(row) % 2 != col % 2:
+            return False
+        return True
+
     def validate(self):
         # Status validation
         if self.mouse_user is None and self.status != GameStatus.CREATED:
@@ -50,10 +59,7 @@ class Game(models.Model):
             self.status = GameStatus.ACTIVE
         # Position validation
         for cell in self.get_array_positions():
-            row = int(cell) / 8
-            col = int(cell) % 8
-
-            if int(row) % 2 != col % 2:
+            if not self.cell_is_valid(cell=cell):
                 raise ValidationError(MSG_ERROR_INVALID_CELL)
         return True
 
@@ -63,6 +69,45 @@ class Game(models.Model):
 
     def get_array_positions(self):
         return [self.cat1, self.cat2, self.cat3, self.cat4, self.mouse]
+
+    def get_cat_positions(self):
+        return [self.cat1, self.cat2, self.cat3, self.cat4]
+
+    def get_game_cells(self):
+        game_cells = []
+        for i in range(0, 64):
+            if i == self.mouse:
+                game_cells.append(-1)
+            elif i in self.get_cat_positions():
+                game_cells.append(1)
+            else:
+                game_cells.append(0)
+        return game_cells
+
+    def mouse_alternatives(self):
+        alternatives = []
+        m = self.mouse
+        #alternatives in the four directions, if they are valid
+        if self.cell_is_valid(m-9):
+            alternatives.append(m-9)
+        if self.cell_is_valid(m-7):
+            alternatives.append(m-7)
+        if self.cell_is_valid(m+7):
+            alternatives.append(m+7)
+        if self.cell_is_valid(m+7):
+            alternatives.append(m+9)
+        return alternatives
+
+    def mouse_is_trapped(self):
+        for target in self.mouse_alternatives():
+            if target not in self.get_cat_positions():
+                return False
+        return True
+
+    def mouse_at_top(self):
+        if int(self.mouse/8) <= int(min(self.get_cat_positions())/8):
+            return True
+        return False
 
     def get_status_str(self):
         if self.status == GameStatus.ACTIVE: return "Active"
@@ -102,91 +147,30 @@ class Move(models.Model):
     date = models.DateField(auto_now=True)
 
     def cat_moving_well(self):
-        """Let's check if the cat is moving correctly """
-
         origin = int(self.origin)
         target = int(self.target)
-        # The target must be different than origin
-        if self.target == self.origin:
-            raise ValidationError(MSG_ERROR_MOVE)
 
         # The target is empty validation
-        if self.target in self.game.get_array_positions():
+        if target in self.game.get_array_positions():
             raise ValidationError(MSG_ERROR_MOVE)
 
-        # The target is a valid position:
-        row = target / 8
-        col = target % 8
-        if int(row) % 2 != col % 2:
+        # The target is a valid position validation
+        if not self.game.cell_is_valid(target):
             raise ValidationError(MSG_ERROR_MOVE)
+
         # If its a cat, the target is origin + 7 or origin + 9
         if origin + 7 != target and origin + 9 != target:
             raise ValidationError(MSG_ERROR_MOVE)
 
-        # Now check the extremes with only one possible movement
-        # Top extreme
-        if self.origin in [57, 59, 61, 63]:
-            raise ValidationError(MSG_ERROR_MOVE)
-        # Right extremes
-        if self.origin == 0 and self.target != 9:
-            raise ValidationError(MSG_ERROR_MOVE)
-        elif self.origin == 16 and self.target != 25:
-            raise ValidationError(MSG_ERROR_MOVE)
-        elif self.origin == 32 and self.target != 41:
-            raise ValidationError(MSG_ERROR_MOVE)
-        elif self.origin == 48 and self.target != 57:
-            raise ValidationError(MSG_ERROR_MOVE)
-        # Left extremes
-        elif self.origin == 15 and self.target != 22:
-            raise ValidationError(MSG_ERROR_MOVE)
-        elif self.origin == 31 and self.target != 38:
-            raise ValidationError(MSG_ERROR_MOVE)
-        elif self.origin == 47 and self.target != 54:
-            raise ValidationError(MSG_ERROR_MOVE)
         return True
 
     def mouse_moving_well(self):
-        """Let's check if the mouse is moving correctly """
-        # The target must be different than origin
-        if self.target == self.origin:
+        # The target is empty validation
+        if self.target in self.game.get_array_positions():
             raise ValidationError(MSG_ERROR_MOVE)
 
-        # The target is a valid position:
-        row = int(self.target) / 8
-        col = int(self.target) % 8
-        if int(row) % 2 != col % 2:
-            raise ValidationError(MSG_ERROR_MOVE)
-
-        origin = int(self.origin)
-        target = int(self.target)
-
-        if origin + 7 != target and origin + 9 != target and origin - 7 != target and origin-9 != target:
-            raise ValidationError(MSG_ERROR_MOVE)
-            # Now check the extremes with only one possible movement
-            # Top extreme
-        if self.origin == 57 and self.target != 48 and self.target != 50:
-            raise ValidationError(MSG_ERROR_MOVE)
-        elif self.origin == 59 and self.target != 50 and self.target != 52:
-            raise ValidationError(MSG_ERROR_MOVE)
-        elif self.origin == 61 and self.target != 52 and self.target != 54:
-            raise ValidationError(MSG_ERROR_MOVE)
-        elif self.origin == 63 and self.target != 54:
-            raise ValidationError(MSG_ERROR_MOVE)
-        # Left extremes
-        elif self.origin == 0 and self.target != 9:
-            raise ValidationError(MSG_ERROR_MOVE)
-        elif self.origin == 16 and self.target != 25 and self.target != 9:
-            raise ValidationError(MSG_ERROR_MOVE)
-        elif self.origin == 32 and self.target != 41 and self.target != 25:
-            raise ValidationError(MSG_ERROR_MOVE)
-        elif self.origin == 48 and self.target != 57 and self.target != 41:
-            raise ValidationError(MSG_ERROR_MOVE)
-        # Right extremes
-        elif self.origin == 15 and self.target != 22 and self.target != 6:
-            raise ValidationError(MSG_ERROR_MOVE)
-        elif self.origin == 31 and self.target != 38 and self.target != 22:
-            raise ValidationError(MSG_ERROR_MOVE)
-        elif self.origin == 47 and self.target != 54 and self.targer != 38:
+        # The target is a valid position validation
+        if self.target not in self.game.mouse_alternatives():
             raise ValidationError(MSG_ERROR_MOVE)
 
         return True
@@ -199,39 +183,26 @@ class Move(models.Model):
         """ Check if the one who moves is the cat or mouse and it coincides with the player that moves """
         # If is cat_turn, then the player must be the cat
         if self.player == self.game.cat_user and self.game.cat_turn:
-            # Check what is the cate moving
-            # print("ORIGEN: ")
-            # print(self.origin)
-            # print("GATOS: ")
-            # print(self.game.cat1)
-            # print(self.game.cat2)
-            # print(self.game.cat3)
-            # print(self.game.cat4)
 
             origin = int(self.origin)
 
-            if origin == self.game.cat1 and self.cat_moving_well():
-                self.game.cat1 = self.target
+            if self.cat_moving_well():
+                if origin is self.game.cat1:
+                    self.game.cat1 = self.target
+                elif origin is self.game.cat2:
+                    self.game.cat2 = self.target
+                elif origin is self.game.cat3:
+                    self.game.cat3 = self.target
+                elif origin is self.game.cat4:
+                    self.game.cat4 = self.target
+                else:
+                    raise ValidationError(MSG_ERROR_MOVE) #Moving an empty cell
+
                 self.game.cat_turn = False
                 self.game.save()
                 return True
-            elif origin == self.game.cat2 and self.cat_moving_well():
-                self.game.cat2 = self.target
-                self.game.cat_turn = False
-                self.game.save()
-                return True
-            elif origin == self.game.cat3 and self.cat_moving_well():
-                self.game.cat3 = self.target
-                self.game.cat_turn = False
-                self.game.save()
-                return True
-            elif origin == self.game.cat4 and self.cat_moving_well():
-                self.game.cat4 = self.target
-                self.game.cat_turn = False
-                self.game.save()
-                return True
-            raise ValidationError(MSG_ERROR_MOVE)
-        # If is cat turn
+
+        # If is mouse turn
         elif self.player == self.game.mouse_user and not self.game.cat_turn and self.mouse_moving_well():
             self.game.mouse = self.target
             self.game.cat_turn = True
