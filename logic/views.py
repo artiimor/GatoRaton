@@ -81,9 +81,11 @@ def counter_service(request):
         request.session['counter'] += 1
 
     counter_session = request.session['counter']
+    print(Counter.objects)
     counter_global = Counter.objects.inc()
 
-    return render(request, 'mouse_cat/counter.html', {'counter_session': counter_session, 'counter_global': counter_global})
+    return render(request, 'mouse_cat/counter.html',
+                  {'counter_session': counter_session, 'counter_global': counter_global})
 
 
 @login_required
@@ -176,6 +178,7 @@ def show_game_service(request):
 
     context_dict['game'] = game
     context_dict['board'] = game_cells
+    context_dict['move_form'] = MoveForm(game=game)
 
     return render(request, "mouse_cat/game.html", context_dict)
 

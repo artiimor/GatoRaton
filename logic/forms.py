@@ -61,6 +61,10 @@ class MoveForm(forms.ModelForm):
     origin = forms.IntegerField(initial=0, required=True)
     target = forms.IntegerField(initial=0, required=True)
 
+    def __init__(self, *args, game=None, **kwargs):
+        self.game = game
+        super(MoveForm, self).__init__(*args, **kwargs)
+
     def is_valid(self):
         if int(self.data['origin']) not in range(0, 64) or int(self.data['target']) not in range(0, 64):
             return False

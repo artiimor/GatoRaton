@@ -82,14 +82,15 @@ class Game(models.Model):
 
 """
     The cells are:
-    |xx|57|xx|59|xx|61|xx|63|
-    |48|xx|50|xx|52|xx|54|xx|
-    |xx|41|xx|43|xx|45|xx|47|
-    |32|xx|34|xx|36|xx|38|xx|
-    |xx|25|xx|27|xx|29|xx|31|
-    |16|xx|18|xx|20|xx|22|xx|
-    |xx|09|xx|11|xx|13|xx|15|
     |00|xx|02|xx|04|xx|06|xx|
+    |xx|09|xx|11|xx|13|xx|15|
+    |16|xx|18|xx|20|xx|22|xx|
+    |xx|25|xx|27|xx|29|xx|31|
+    |32|xx|34|xx|36|xx|38|xx|
+    |xx|41|xx|43|xx|45|xx|47|
+    |48|xx|50|xx|52|xx|54|xx|
+    |xx|57|xx|59|xx|61|xx|63|
+
 """
 
 
@@ -256,11 +257,10 @@ class SingletonCounter(models.Manager):
 
     def inc(self):
         try:
-            counter = Counter.objects.get(pk=1)
+            counter = Counter.objects()
             counter.value += 1
             Counter.objects.all().filter(pk=1).update(value=counter.value)
             return counter.value
-        # If the singleton doesn't exist we create it
         except ObjectDoesNotExist:
             # Initial value is 1 because we are increasing the counter
             counter = Counter(value=1, pk=1)
