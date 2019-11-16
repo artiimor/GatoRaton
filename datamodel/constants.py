@@ -2,3 +2,6 @@ MSG_ERROR_INVALID_CELL = "Invalid cell for a cat or the mouse|Gato o ratón en p
 MSG_ERROR_GAMESTATUS = "Game status not valid|Estado no válido"
 MSG_ERROR_MOVE = "Move not allowed|Movimiento no permitido"
 MSG_ERROR_NEW_COUNTER = "Insert not allowed|Inseción no permitida"
+ERROR_MESSAGE_ID = "msg_error"
+GAME_SELECTED_SESSION_ID = "game_id"
+ERROR_NOT_FOUND = "Page not found|Página no encontrada"

@@ -1,7 +1,7 @@
 """
 @author: rlatorre
 
-ChangeLog: 
+ChangeLog:
 2019 Nov 8 (@author rmarabini): change TestCase by TransactionTestCase
 When runing the test, TestCase creates a transaction and all test code are now under a "transaction block". At the end of the test, TestCase will rollback all things to keep your DB clean. When using  posgres as database AND accesing functions that require login without login in first, the database connection is disconected and the rollback fails producing different errors in the code. TransactionTestCase instead of using a rollback deletes the tables are recreates them. This is an slower approach but more robust.
 """
