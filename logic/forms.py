@@ -3,6 +3,7 @@ from django.contrib.auth.models import User
 from django.contrib.auth import password_validation, authenticate
 from django.contrib.auth.forms import AuthenticationForm, UserCreationForm
 from django.core.exceptions import ValidationError
+from datamodel.models import Move
 
 
 class SignupForm(UserCreationForm):
@@ -54,3 +55,18 @@ class LogInForm(AuthenticationForm):
     class Meta:
         model = User
         fields = ('username', 'password')
+
+
+class MoveForm(forms.ModelForm):
+    origin = forms.IntegerField(initial=0, required=True)
+    target = forms.IntegerField(initial=0, required=True)
+
+    def is_valid(self):
+        if int(self.data['origin']) not in range(0, 64) or int(self.data['target']) not in range(0, 64):
+            return False
+        return super(MoveForm, self).is_valid()
+
+    class Meta:
+        # Provide an association between the ModelForm and a model
+        model = Move
+        fields = ('origin', 'target')

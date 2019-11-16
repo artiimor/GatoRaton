@@ -70,17 +70,17 @@ JOIN_GAME_TITLE = r"<h1>Join game</h1>|<h1>Unirse a juego</h1>"
 CLEAN_SERVICE = "clean_db"
 CLEAN_TITLE = r"<h1>Clean orphan games</h1>|<h1>Borrar juegos huérfanos</h1>"
 
-SELECT_GAME_SERVICE = "select_game"
+SELECT_GAME_SERVICE = "logic:select_game"
 SELECT_GAME_ERROR_NOCAT = "select_game_error1"
 SELECT_GAME_ERROR_NOMOUSE = "select_game_error2"
 SELECT_GAME_TITLE = r"<h1>Select game</h1>|<h1>Seleccionar juego</h1>"
 
-SHOW_GAME_SERVICE = "show_game"
+SHOW_GAME_SERVICE = "logic:show_game"
 PLAY_GAME_MOVING = "play_moving"
 PLAY_GAME_WAITING = "play_waiting"
 SHOW_GAME_TITLE = r"<h1>Play</h1>|<h1>Jugar</h1>"
 
-MOVE_SERVICE = "move"
+MOVE_SERVICE = "logic:move"
 
 SERVICE_DEF = {
     LANDING_PAGE: {

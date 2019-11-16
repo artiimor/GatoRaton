@@ -73,20 +73,17 @@ def signup_service(request):
 
 
 def counter_service(request):
-    context_dict = {}
 
     # If there is no counter we create it
     if 'counter' not in request.session:
-        request.session['counter'] = 0
+        request.session['counter'] = 1
+    else:
+        request.session['counter'] += 1
 
     counter_session = request.session['counter']
-    context_dict['counter_session'] = counter_session
+    counter_global = Counter.objects.inc()
 
-    # Now the global counter
-    counter_global = Counter.value
-    context_dict['counter_global'] = counter_global
-
-    return render(request, 'mouse_cat/counter.html', context_dict)
+    return render(request, 'mouse_cat/counter.html', {'counter_session': counter_session, 'counter_global': counter_global})
 
 
 @login_required
@@ -131,7 +128,7 @@ def select_game_service(request):
         game_id = request.POST.get('game_id')
         request.session['game'] = Game.object.filter(id=game_id)
 
-        return redirect(reverse('mouse_cat:show_game'))
+        return redirect(reverse('logic:show_game'))
 
     # if method is get we show all the games
     user = request.user
@@ -144,12 +141,13 @@ def select_game_service(request):
     return render(request, "mouse_cat/select_game.html", context_dict)
 
 
+@login_required
 def show_game_service(request):
     context_dict = {}
 
     # If we don't know the user render login
-    if 'user' not in request.session:
-        return render(request, 'mouse_cat/login.html')
+    #if 'user' not in request.session:
+    #    return render(request, 'mouse_cat/login.html')
 
     game = request.session['game']
     user = request.session['user']
