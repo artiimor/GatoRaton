@@ -53,7 +53,7 @@ class Game(models.Model):
             row = int(cell/8)
             col = int(cell % 8)
             if row % 2 != col % 2:
-                raise ValidationError(MSG_ERROR_MOVE)
+                raise ValidationError(MSG_ERROR_INVALID_CELL)
         return True
 
     def save(self, *args, **kwargs):
@@ -276,4 +276,3 @@ class Counter(models.Model):
 
     def __str__(self):
         return "The counter id is:: "+str(self.id)+"\nAnd the value is: "+str(self.value)
-
