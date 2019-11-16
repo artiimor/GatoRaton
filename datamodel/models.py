@@ -53,7 +53,7 @@ class Game(models.Model):
             row = int(cell/8)
             col = int(cell % 8)
             if row % 2 != col % 2:
-                raise ValidationError(MSG_ERROR_INVALID_CELL)
+                raise ValidationError(MSG_ERROR_MOVE)
         return True
 
     def save(self, *args, **kwargs):
@@ -79,6 +79,19 @@ class Game(models.Model):
         return status + cat + mouse
 
 
+"""
+    The cells are:
+    |xx|57|xx|59|xx|61|xx|63|
+    |48|xx|50|xx|52|xx|54|xx|
+    |xx|41|xx|43|xx|45|xx|47|
+    |32|xx|34|xx|36|xx|38|xx|
+    |xx|25|xx|27|xx|29|xx|31|
+    |16|xx|18|xx|20|xx|22|xx|
+    |xx|09|xx|11|xx|13|xx|15|
+    |00|xx|02|xx|04|xx|06|xx|
+"""
+
+
 class Move(models.Model):
     origin = models.IntegerField(null=False)
     target = models.IntegerField(null=False)
@@ -86,14 +99,137 @@ class Move(models.Model):
     player = models.ForeignKey(User, on_delete=models.CASCADE)
     date = models.DateField(auto_now=True)
 
+    def cat_moving_well(self):
+        """Let's check if the cat is moving correctly """
+        # The target must be different than origin
+        if self.target == self.origin:
+            raise ValidationError(MSG_ERROR_MOVE)
+
+        # The target is empty validation
+        if self.target in self.game.get_array_positions():
+            raise ValidationError(MSG_ERROR_MOVE)
+
+        # The target is a valid position:
+        row = int(self.target / 8)
+        col = int(self.target % 8)
+        if row % 2 != col % 2:
+            raise ValidationError(MSG_ERROR_MOVE)
+
+        # If its a cat, the target is origin + 7 or origin + 9
+        if self.origin + 7 != self.target and self.origin + 9 != self.target:
+            raise ValidationError(MSG_ERROR_MOVE)
+
+        # Now check the extremes with only one possible movement
+        # Top extreme
+        if self.origin in [57, 59, 61, 63]:
+            raise ValidationError(MSG_ERROR_MOVE)
+        # Right extremes
+        if self.origin == 0 and self.target != 9:
+            raise ValidationError(MSG_ERROR_MOVE)
+        elif self.origin == 16 and self.target != 25:
+            raise ValidationError(MSG_ERROR_MOVE)
+        elif self.origin == 32 and self.target != 41:
+            raise ValidationError(MSG_ERROR_MOVE)
+        elif self.origin == 48 and self.target != 57:
+            raise ValidationError(MSG_ERROR_MOVE)
+        # Left extremes
+        elif self.origin == 15 and self.target != 22:
+            raise ValidationError(MSG_ERROR_MOVE)
+        elif self.origin == 31 and self.target != 38:
+            raise ValidationError(MSG_ERROR_MOVE)
+        elif self.origin == 47 and self.target != 54:
+            raise ValidationError(MSG_ERROR_MOVE)
+
+        return True
+
+    def mouse_moving_well(self):
+        """Let's check if the mouse is moving correctly """
+        # The target must be different than origin
+        if self.target == self.origin:
+            raise ValidationError(MSG_ERROR_MOVE)
+
+        # The target is a valid position:
+        row = int(self.target / 8)
+        col = int(self.target % 8)
+        if row % 2 != col % 2:
+            raise ValidationError(MSG_ERROR_MOVE)
+
+        if self.origin + 7 != self.target and self.origin + 9 != self.target and self.origin - 7 != self.target and self.origin-9 != self.target:
+            raise ValidationError(MSG_ERROR_MOVE)
+            # Now check the extremes with only one possible movement
+            # Top extreme
+        if self.origin == 57 and self.target != 48 and self.target != 50:
+            raise ValidationError(MSG_ERROR_MOVE)
+        elif self.origin == 59 and self.target != 50 and self.target != 52:
+            raise ValidationError(MSG_ERROR_MOVE)
+        elif self.origin == 61 and self.target != 52 and self.target != 54:
+            raise ValidationError(MSG_ERROR_MOVE)
+        elif self.origin == 63 and self.target != 54:
+            raise ValidationError(MSG_ERROR_MOVE)
+        # Left extremes
+        elif self.origin == 0 and self.target != 9:
+            raise ValidationError(MSG_ERROR_MOVE)
+        elif self.origin == 16 and self.target != 25 and self.target != 9:
+            raise ValidationError(MSG_ERROR_MOVE)
+        elif self.origin == 32 and self.target != 41 and self.target != 25:
+            raise ValidationError(MSG_ERROR_MOVE)
+        elif self.origin == 48 and self.target != 57 and self.target != 41:
+            raise ValidationError(MSG_ERROR_MOVE)
+        # Right extremes
+        elif self.origin == 15 and self.target != 22 and self.target != 6:
+            raise ValidationError(MSG_ERROR_MOVE)
+        elif self.origin == 31 and self.target != 38 and self.target != 22:
+            raise ValidationError(MSG_ERROR_MOVE)
+        elif self.origin == 47 and self.target != 54 and self.targer != 38:
+            raise ValidationError(MSG_ERROR_MOVE)
+
+        return True
+
     def validate(self):
+        # We check if the game is active
         if self.game.status != GameStatus.ACTIVE:
             raise ValidationError(MSG_ERROR_MOVE)
-        return True
+
+        """ Check if the one who moves is the cat or mouse and it coincides with the player that moves """
+        # If is cat_turn, then the player must be the cat
+        if self.player == self.game.cat_user and self.game.cat_turn:
+            # Check what is the cate moving
+            if self.origin == self.game.cat1 and self.cat_moving_well():
+                self.game.cat1 = self.target
+                self.game.cat_turn = False
+                self.game.save()
+                return True
+            elif self.origin == self.game.cat2 and self.cat_moving_well():
+                self.game.cat2 = self.target
+                self.game.cat_turn = False
+                self.game.save()
+                return True
+            elif self.origin == self.game.cat3 and self.cat_moving_well():
+                self.game.cat3 = self.target
+                self.game.cat_turn = False
+                self.game.save()
+                return True
+            elif self.origin == self.game.cat4 and self.cat_moving_well():
+                self.game.cat4 = self.target
+                self.game.cat_turn = False
+                self.game.save()
+                return True
+            raise ValidationError(MSG_ERROR_MOVE)
+        # If is cat turn
+        elif self.player == self.game.mouse_user and not self.game.cat_turn and self.mouse_moving_well():
+            self.game.mouse = self.target
+            self.game.cat_turn = True
+            self.game.save()
+            return True
+
+        raise ValidationError(MSG_ERROR_MOVE)
 
     def save(self, *args, **kwargs):
         if self.validate() is True:
             super(Move, self).save(*args, **kwargs)
+
+    def create(self,game, player, origin, target):
+        self.validate()
 
 
 # This class work for Counter.objects. Making it a singleton class

@@ -1,4 +1,4 @@
-from django.http import HttpResponseForbidden
+from django.http import HttpResponseForbidden, HttpResponseNotFound
 from django.http import HttpResponse
 from django.shortcuts import render
 from django.shortcuts import redirect
@@ -8,7 +8,7 @@ from django.contrib.auth.decorators import login_required
 
 from datamodel import constants
 from datamodel.models import Game, Move, Counter, User
-from logic.forms import SignupForm, LogInForm
+from logic.forms import SignupForm, LogInForm, MoveForm
 
 
 def anonymous_required(f):
@@ -87,3 +87,111 @@ def counter_service(request):
     context_dict['counter_global'] = counter_global
 
     return render(request, 'mouse_cat/counter.html', context_dict)
+
+
+@login_required
+def create_game_service(request):
+    context_dict = {}
+
+    # create the game
+    game = Game(cat_user=request.user)
+    game.save()
+
+    context_dict['game'] = game
+
+    return render(request, "mouse_cat/new_game.html", context_dict)
+
+
+@login_required
+def join_game_service(request):
+    context_dict = {}
+
+    # Same that in test_query
+    game_aux = Game.objects.filter(mouse_user=None)
+    game = game_aux[0]
+
+    for g in game_aux:
+        if g.id < game.id:
+            game = g
+
+    # game is the game with less id
+    game.mouse_user = request.user
+    game.save()
+
+    context_dict['game'] = game
+
+    return render(request, "mouse_cat/join_game.html", context_dict)
+
+
+@login_required
+def select_game_service(request):
+    context_dict = {}
+    # Select one game to play
+    if request.method == 'POST':
+        game_id = request.POST.get('game_id')
+        request.session['game'] = Game.object.filter(id=game_id)
+
+        return redirect(reverse('mouse_cat:show_game'))
+
+    # if method is get we show all the games
+    user = request.user
+    cat_games = Game.objects.filter(cat_user=user)
+    mouse_games = Game.objects.filter(mouse_user=user)
+
+    context_dict['as_cat'] = cat_games
+    context_dict['as_mouse'] = mouse_games
+
+    return render(request, "mouse_cat/select_game.html", context_dict)
+
+
+def show_game_service(request):
+    context_dict = {}
+
+    # If we don't know the user render login
+    if 'user' not in request.session:
+        return render(request, 'mouse_cat/login.html')
+
+    game = request.session['game']
+    user = request.session['user']
+
+    game_cells = []
+    ocupped_cells = game.get_array_positions()
+    mouse_cell = ocupped_cells[-1]
+
+    for i in range(0,64):
+        if i == mouse_cell:
+            game_cells[i] = -1
+        elif i in ocupped_cells:
+            game_cells[i] = 1
+        else:
+            game_cells[i] = 0
+
+    context_dict['game'] = game
+    context_dict['board'] = game_cells
+
+    return render(request, "mouse_cat/game.html", context_dict)
+
+
+@login_required
+def move_service(request):
+    context_dict = {}
+
+    # Check if there's a user
+    if not request.user:
+        redirect(reverse('mouse_cat:login'))
+
+    player = request.user
+
+    if 'game_id' in request.session.keys():
+        game_id = request.session['game_id']
+
+        if request.method == 'POST':
+            movement = MoveForm(request.POST)
+            game = Game.objects.get(id=game_id)
+
+            Move.objects.create(game=game, player=player,
+                                origin=movement.data['origin'], target=movement.data['target'])
+
+            return redirect(reverse('show_game'))
+
+    return HttpResponseNotFound('<h1>There was a problem</h1>')
