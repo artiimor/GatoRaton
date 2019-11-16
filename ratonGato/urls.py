@@ -29,6 +29,8 @@ urlpatterns = [
     path('create_game/', views.create_game_service, name='create_game'),
     path('join_game/', views.join_game_service, name='join_game'),
     path('select_game/', views.select_game_service, name='select_game'),
+    path('select_game/<int:game_id>/',
+         views.select_game_service, name='select_game'),
     path('show_game/', views.show_game_service, name='show_game'),
     path('move/', views.move_service, name='move')
 ]

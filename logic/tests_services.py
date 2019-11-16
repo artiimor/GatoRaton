@@ -637,7 +637,6 @@ class SelectGameServiceTests(GameRequiredBaseServiceTests):
             else:
                 GameStatus.FINISHED
             game.save()
-
         self.loginTestUser(self.client2, self.user2)
         response = self.client2.get(reverse(SELECT_GAME_SERVICE), follow=True)
         self.is_select_game(response)

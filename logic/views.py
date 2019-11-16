@@ -7,7 +7,7 @@ from django.contrib.auth import authenticate, login, logout
 from django.contrib.auth.decorators import login_required
 
 from datamodel import constants
-from datamodel.models import Game, Move, Counter, User
+from datamodel.models import Game, Move, Counter, User, GameStatus
 from logic.forms import SignupForm, LogInForm, MoveForm
 
 
@@ -122,24 +122,34 @@ def join_game_service(request):
 
 
 @login_required
-def select_game_service(request):
+def select_game_service(request, game_id=-1):
     context_dict = {}
-    # Select one game to play
-    if request.method == 'POST':
-        game_id = request.POST.get('game_id')
-        request.session['game'] = Game.object.filter(id=game_id)
 
-        return redirect(reverse('show_game'))
+    # Movida mazo cutre con game_id
+    # The get in a bad way
+    if game_id == -1:
+        # if method is get we show all the games
+        user = request.user
+        as_cat = Game.objects.filter(cat_user=user)
 
-    # if method is get we show all the games
-    user = request.user
-    cat_games = Game.objects.filter(cat_user=user)
-    mouse_games = Game.objects.filter(mouse_user=user)
+        as_mouse = Game.objects.filter(mouse_user=user)
 
-    context_dict['as_cat'] = cat_games
-    context_dict['as_mouse'] = mouse_games
+        context_dict['as_cat'] = as_cat
+        context_dict['as_mouse'] = as_mouse
 
-    return render(request, "mouse_cat/select_game.html", context_dict)
+        return render(request, "mouse_cat/select_game.html", context_dict)
+
+    # POST in a bad way
+    game = Game.objects.filter(id=game_id).first()
+    if not game or game.status == GameStatus.CREATED:
+        return HttpResponseNotFound(constants.ERROR_NOT_FOUND)
+    else:
+        if game.cat_user == request.user or game.mouse_user == request.user:
+            request.session['game_id'] = game.id
+            return redirect(reverse('show_game'))
+
+        else:
+            return HttpResponseNotFound(constants.ERROR_NOT_FOUND)
 
 
 @login_required
@@ -160,6 +170,7 @@ def show_game_service(request):
     for i in range(0,64):
         if i == mouse_cell:
             game_cells[i] = -1
+            {'game': game}
         elif i in ocupped_cells:
             game_cells[i] = 1
         else:
@@ -185,12 +196,12 @@ def move_service(request):
         game_id = request.session['game_id']
 
         if request.method == 'POST':
+
             movement = MoveForm(request.POST)
             game = Game.objects.get(id=game_id)
-
             Move.objects.create(game=game, player=player,
                                 origin=movement.data['origin'], target=movement.data['target'])
 
-            return redirect(reverse('show_game'))
+            return redirect(reverse('show_game'),)
 
     return HttpResponseNotFound('<h1>There was a problem</h1>')

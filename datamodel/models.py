@@ -50,9 +50,10 @@ class Game(models.Model):
             self.status = GameStatus.ACTIVE
         # Position validation
         for cell in self.get_array_positions():
-            row = int(cell/8)
-            col = int(cell % 8)
-            if row % 2 != col % 2:
+            row = int(cell) / 8
+            col = int(cell) % 8
+
+            if int(row) % 2 != col % 2:
                 raise ValidationError(MSG_ERROR_INVALID_CELL)
         return True
 
@@ -101,6 +102,9 @@ class Move(models.Model):
 
     def cat_moving_well(self):
         """Let's check if the cat is moving correctly """
+
+        origin = int(self.origin)
+        target = int(self.target)
         # The target must be different than origin
         if self.target == self.origin:
             raise ValidationError(MSG_ERROR_MOVE)
@@ -110,13 +114,12 @@ class Move(models.Model):
             raise ValidationError(MSG_ERROR_MOVE)
 
         # The target is a valid position:
-        row = int(self.target / 8)
-        col = int(self.target % 8)
-        if row % 2 != col % 2:
+        row = target / 8
+        col = target % 8
+        if int(row) % 2 != col % 2:
             raise ValidationError(MSG_ERROR_MOVE)
-
         # If its a cat, the target is origin + 7 or origin + 9
-        if self.origin + 7 != self.target and self.origin + 9 != self.target:
+        if origin + 7 != target and origin + 9 != target:
             raise ValidationError(MSG_ERROR_MOVE)
 
         # Now check the extremes with only one possible movement
@@ -139,7 +142,6 @@ class Move(models.Model):
             raise ValidationError(MSG_ERROR_MOVE)
         elif self.origin == 47 and self.target != 54:
             raise ValidationError(MSG_ERROR_MOVE)
-
         return True
 
     def mouse_moving_well(self):
@@ -149,12 +151,15 @@ class Move(models.Model):
             raise ValidationError(MSG_ERROR_MOVE)
 
         # The target is a valid position:
-        row = int(self.target / 8)
-        col = int(self.target % 8)
-        if row % 2 != col % 2:
+        row = int(self.target) / 8
+        col = int(self.target) % 8
+        if int(row) % 2 != col % 2:
             raise ValidationError(MSG_ERROR_MOVE)
 
-        if self.origin + 7 != self.target and self.origin + 9 != self.target and self.origin - 7 != self.target and self.origin-9 != self.target:
+        origin = int(self.origin)
+        target = int(self.target)
+
+        if origin + 7 != target and origin + 9 != target and origin - 7 != target and origin-9 != target:
             raise ValidationError(MSG_ERROR_MOVE)
             # Now check the extremes with only one possible movement
             # Top extreme
@@ -194,22 +199,32 @@ class Move(models.Model):
         # If is cat_turn, then the player must be the cat
         if self.player == self.game.cat_user and self.game.cat_turn:
             # Check what is the cate moving
-            if self.origin == self.game.cat1 and self.cat_moving_well():
+            # print("ORIGEN: ")
+            # print(self.origin)
+            # print("GATOS: ")
+            # print(self.game.cat1)
+            # print(self.game.cat2)
+            # print(self.game.cat3)
+            # print(self.game.cat4)
+
+            origin = int(self.origin)
+
+            if origin == self.game.cat1 and self.cat_moving_well():
                 self.game.cat1 = self.target
                 self.game.cat_turn = False
                 self.game.save()
                 return True
-            elif self.origin == self.game.cat2 and self.cat_moving_well():
+            elif origin == self.game.cat2 and self.cat_moving_well():
                 self.game.cat2 = self.target
                 self.game.cat_turn = False
                 self.game.save()
                 return True
-            elif self.origin == self.game.cat3 and self.cat_moving_well():
+            elif origin == self.game.cat3 and self.cat_moving_well():
                 self.game.cat3 = self.target
                 self.game.cat_turn = False
                 self.game.save()
                 return True
-            elif self.origin == self.game.cat4 and self.cat_moving_well():
+            elif origin == self.game.cat4 and self.cat_moving_well():
                 self.game.cat4 = self.target
                 self.game.cat_turn = False
                 self.game.save()
@@ -228,7 +243,7 @@ class Move(models.Model):
         if self.validate() is True:
             super(Move, self).save(*args, **kwargs)
 
-    def create(self,game, player, origin, target):
+    def create(self, game, player, origin, target):
         self.validate()
 
 
