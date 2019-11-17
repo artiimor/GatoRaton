@@ -102,10 +102,12 @@ class Game(models.Model):
         for target in self.mouse_alternatives():
             if target not in self.get_cat_positions():
                 return False
+        self.status = GameStatus.FINISHED
         return True
 
     def mouse_at_top(self):
         if int(self.mouse/8) <= int(min(self.get_cat_positions())/8):
+            self.status = GameStatus.FINISHED
             return True
         return False
 
