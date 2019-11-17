@@ -182,7 +182,6 @@ class Move(models.Model):
         if self.game.status != GameStatus.ACTIVE:
             raise ValidationError(MSG_ERROR_MOVE)
 
-        """ Check if the one who moves is the cat or mouse and it coincides with the player that moves """
         # If is cat_turn, then the player must be the cat
         if self.player == self.game.cat_user and self.game.cat_turn:
 
@@ -198,7 +197,8 @@ class Move(models.Model):
                 elif origin is self.game.cat4:
                     self.game.cat4 = self.target
                 else:
-                    raise ValidationError(MSG_ERROR_MOVE) #Moving an empty cell
+                    #Moving from an empty cell
+                    raise ValidationError(MSG_ERROR_MOVE)
 
                 self.game.cat_turn = False
                 self.game.save()
