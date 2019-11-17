@@ -81,17 +81,14 @@ STATICFILES_DIRS = [STATIC_DIR, ]
 # Database
 # https://docs.djangoproject.com/en/2.1/ref/settings/#databases
 
-DATABASES = {
-    'default': {
-        'ENGINE': 'django.db.backends.postgresql',
-        'NAME': 'ratongato',
-        'USER': 'alumnodb',
-        'PASSWORD': 'alumnodb',
-        'HOST': 'localhost',
-        'PORT': '5432',
+DATABASES = {}
+if os.getenv('SQLITE', False):
+    DATABASES['default'] = {
+        'ENGINE': 'django.db.backends.sqlite3',
+        'NAME': os.path.join(BASE_DIR, 'db.sqlite3'),
     }
-}
-DATABASES['default'] = dj_database_url.config(default='postgres://alumnodb:alumnodb@localhost:5432/ratongato')
+else:
+    DATABASES['default'] = dj_database_url.config(default='postgres://alumnodb:alumnodb@localhost:5432/ratongato')
 
 
 # Password validation
