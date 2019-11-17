@@ -164,8 +164,12 @@ def show_game_service(request):
 
     game = Game.objects.get(id=request.session['game_id'])
     if game.mouse_is_trapped():
+        game.status = GameStatus.FINISHED
+        game.save()
         return HttpResponse("<h1>Play</h1><p>Game Finished!<br>Cats win!</p>")
     if game.mouse_at_top():
+        game.status = GameStatus.FINISHED
+        game.save()
         return HttpResponse("<h1>Play</h1><p>Game Finished!<br>Mouse wins!</p>")
 
     context_dict['game'] = game
