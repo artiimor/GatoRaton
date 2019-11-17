@@ -158,19 +158,18 @@ def select_game_service(request, game_id=-1):
 def show_game_service(request):
     context_dict = {}
 
-    # OJO: Se queda siempre en este control
     if 'game_id' not in request.session:
-        return HttpResponse("<h1>Play</h1>No game selected.")
+        return redirect(reverse('index'))
 
     game = Game.objects.get(id=request.session['game_id'])
     if game.mouse_is_trapped():
         game.status = GameStatus.FINISHED
         game.save()
-        return HttpResponse("<h1>Play</h1><p>Game Finished!<br>Cats win!</p>")
+        return render(request, "mouse_cat/game_finished.html", {'winner':"Cats"})
     if game.mouse_at_top():
         game.status = GameStatus.FINISHED
         game.save()
-        return HttpResponse("<h1>Play</h1><p>Game Finished!<br>Mouse wins!</p>")
+        return render(request, "mouse_cat/game_finished.html", {'winner':"Mouse"})
 
     context_dict['game'] = game
     context_dict['board'] = game.get_game_cells()
@@ -185,7 +184,7 @@ def move_service(request):
 
     # Check if there's a user
     if not request.user:
-        redirect(reverse('login'))
+        return redirect(reverse('login'))
 
     player = request.user
 
