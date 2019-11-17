@@ -11,7 +11,8 @@ class SignupForm(UserCreationForm):
     username = forms.CharField(required=True)
     password = forms.CharField(widget=forms.PasswordInput(), required=True)
     password1 = forms.CharField(widget=forms.HiddenInput(), required=False)
-    password2 = forms.CharField(label="Confirm password", widget=forms.PasswordInput(), required=True)
+    password2 = forms.CharField(label="Confirm password",
+                                widget=forms.PasswordInput(), required=True)
 
     def __init__(self, *args, **kwargs):
         super(SignupForm, self).__init__(*args, **kwargs)
@@ -26,7 +27,9 @@ class SignupForm(UserCreationForm):
         password2 = self.cleaned_data.get('password2')
         password = self.cleaned_data.get('password')
         if password != password2 and password and password2:
-            raise ValidationError("Password and Repeat password are not the same", code='signup_error1')
+            raise ValidationError(
+                "Password and Repeat password are not the same",
+                code='signup_error1')
 
         return password2
 
@@ -47,7 +50,8 @@ class LogInForm(AuthenticationForm):
         if not User.objects.filter(username=self.data['username']).exists():
             self.add_error(None, "Username/password is not valid")
             return False
-        if not authenticate(username=self.data['username'], password=self.data['password']):
+        if not authenticate(username=self.data['username'],
+                            password=self.data['password']):
             self.add_error(None, "Username/password is not valid")
             return False
         return super(LogInForm, self).is_valid()
@@ -65,7 +69,8 @@ class MoveForm(forms.ModelForm):
         super(MoveForm, self).__init__(*args, **kwargs)
 
     def is_valid(self):
-        if int(self.data['origin']) not in range(0, 64) or int(self.data['target']) not in range(0, 64):
+        if int(self.data['origin']) not in range(0, 64) \
+                or int(self.data['target']) not in range(0, 64):
             self.add_error(None, "Move not allowed")
             return False
         return super(MoveForm, self).is_valid()

@@ -30,8 +30,8 @@ SECRET_KEY = 'f&gyrc*h+-+h20mbvr0gatnphuk38m57884=!yo_9*#epfq#73'
 # SECURITY WARNING: don't run with debug turned on in production!
 DEBUG = True
 
-ALLOWED_HOSTS = [u'hidden-cove-11261.herokuapp.com', u'localhost', u'127.0.0.1']
-
+ALLOWED_HOSTS = [u'hidden-cove-11261.herokuapp.com',
+                 u'localhost', u'127.0.0.1']
 
 # Application definition
 
@@ -62,7 +62,7 @@ ROOT_URLCONF = 'ratonGato.urls'
 TEMPLATES = [
     {
         'BACKEND': 'django.template.backends.django.DjangoTemplates',
-        'DIRS': [TEMPLATE_DIR,],
+        'DIRS': [TEMPLATE_DIR, ],
         'APP_DIRS': True,
         'OPTIONS': {
             'context_processors': [
@@ -88,28 +88,18 @@ if os.getenv('SQLITE', False):
         'NAME': os.path.join(BASE_DIR, 'db.sqlite3'),
     }
 else:
-    DATABASES['default'] = dj_database_url.config(default='postgres://alumnodb:alumnodb@localhost:5432/ratongato')
+    DATABASES['default'] = dj_database_url.config(
+        default='postgres://alumnodb:alumnodb@localhost:5432/ratongato')
 
 
 # Password validation
 # https://docs.djangoproject.com/en/2.1/ref/settings/#auth-password-validators
-
+val = 'django.contrib.auth.password_validation'
 AUTH_PASSWORD_VALIDATORS = [
-    {
-        'NAME': 'django.contrib.auth.password_validation.MinimumLengthValidator',
-        'OPTIONS': {
-            'min_length': 6,
-        }
-    },
-    {
-        'NAME': 'django.contrib.auth.password_validation.UserAttributeSimilarityValidator',
-    },
-    {
-        'NAME': 'django.contrib.auth.password_validation.CommonPasswordValidator',
-    },
-    {
-        'NAME': 'django.contrib.auth.password_validation.NumericPasswordValidator',
-    },
+    {'NAME': val + '.MinimumLengthValidator', 'OPTIONS': {'min_length': 6, }},
+    {'NAME': val + '.UserAttributeSimilarityValidator'},
+    {'NAME': val + '.CommonPasswordValidator'},
+    {'NAME': val + '.NumericPasswordValidator'},
 ]
 
 
