@@ -1,0 +1,73 @@
+(nipple) dv@Redmi:~/GatoRaton$ coverage erase
+(nipple) dv@Redmi:~/GatoRaton$ coverage run --omit="*/test*" --source=datamodel ./manage.py test datamodel.tests_models
+Creating test database for alias 'default'...
+System check identified no issues (0 silenced).
+..................
+----------------------------------------------------------------------
+Ran 18 tests in 6.306s
+
+OK
+Destroying test database for alias 'default'...
+(nipple) dv@Redmi:~/GatoRaton$ coverage report -m -i
+Name                                   Stmts   Miss  Cover   Missing
+--------------------------------------------------------------------
+datamodel/__init__.py                      0      0   100%
+datamodel/apps.py                          3      3     0%   1-5
+datamodel/constants.py                     7      0   100%
+datamodel/migrations/0001_initial.py       8      0   100%
+datamodel/migrations/__init__.py           0      0   100%
+datamodel/models.py                      176     33    81%   69, 72-80, 91, 93, 97-101, 104-107, 158, 162, 166, 173, 177, 196-202, 216, 223, 264
+--------------------------------------------------------------------
+TOTAL                                    194     36    81%
+
+
+
+
+
+(nipple) dv@Redmi:~/GatoRaton$ coverage erase
+(nipple) dv@Redmi:~/GatoRaton$ coverage run --omit="*/test*" --source=logic ./manage.py test logic.tests_function
+Creating test database for alias 'default'...
+System check identified no issues (0 silenced).
+......
+----------------------------------------------------------------------
+Ran 6 tests in 5.052s
+
+OK
+Destroying test database for alias 'default'...
+(nipple) dv@Redmi:~/GatoRaton$ coverage report -m -i
+Name                           Stmts   Miss  Cover   Missing
+------------------------------------------------------------
+logic/__init__.py                  0      0   100%
+logic/apps.py                      3      3     0%   1-5
+logic/forms.py                    57     26    54%   18-19, 22-24, 27-34, 37-40, 50-57, 69, 72-76
+logic/migrations/__init__.py       0      0   100%
+logic/views.py                   120     95    21%   16-21, 26-28, 32, 37-48, 54-56, 61-74, 80-88, 97-99, 106-124, 129-156, 161-182, 189-211
+------------------------------------------------------------
+TOTAL                            180    124    31%
+
+
+
+
+
+
+(nipple) dv@Redmi:~/GatoRaton$ coverage erase
+(nipple) dv@Redmi:~/GatoRaton$ coverage run --omit="*/test*" --source=logic ./manage.py test logic.tests_services
+Creating test database for alias 'default'...
+System check identified no issues (0 silenced).
+.....................................
+----------------------------------------------------------------------
+Ran 37 tests in 55.989s
+
+OK
+Destroying test database for alias 'default'...
+(nipple) dv@Redmi:~/GatoRaton$ coverage report -m -i
+Name                           Stmts   Miss  Cover   Missing
+------------------------------------------------------------
+logic/__init__.py                  0      0   100%
+logic/apps.py                      3      3     0%   1-5
+logic/forms.py                    57      0   100%
+logic/migrations/__init__.py       0      0   100%
+logic/views.py                   120     11    91%   164, 168-170, 173-175, 190, 205-208
+------------------------------------------------------------
+TOTAL                            180     14    92%
+
