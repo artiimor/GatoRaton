@@ -1,41 +1,54 @@
+<!DOCTYPE html>
+<html lang="en">
 {% load staticfiles %}
-<html>
 <head>
     {% block extra_css %}
-        <link rel="stylesheet" type="text/css" href="{% static 'css/style.css' %}"/>
+    <link rel="stylesheet" type="text/css" href="{% static 'css/style.css' %}"/>
+    <link href="https://fonts.googleapis.com/css?family=Press+Start+2P&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/4.7.0/css/font-awesome.min.css">
     {% endblock extra_css %}
-
     {% block extra_js %}
-    
+  	<script type="text/javascript" src="{% static 'js/jquery.min.js' %}"></script>
+    <script type="text/javascript" src="{% static 'js/drag-drop-custom.js' %}"></script>
+    <script type="text/javascript" src="{% static 'js/drag-drop-custom.js' %}"></script>
     {% endblock extra_js %}
-
     {% block extra_head %}
-    
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <link rel="shortcut icon" href="{%  static 'img/favicon.png' %}">
     {% endblock extra_head %}
-    <title>{% block title %}PSI 2019-2020: Example of application{% endblock %}</title>
+    <title>{% block title %}Mouse vs Cats{% endblock %}</title>
 </head>
 
-<body id="body">
-    <div id="totalheader">
-        <div id="title">
-            {% block atitle %}<h1>Mouse vs. Cats application</h1>{% endblock atitle %}
-        </div>
+<body>
+	<div id="page-container">
+		<div id="content-wrap">
+			<div class="top">
+				<header id="header">
+					<div id="hgroup">
+            {% block atitle %}
+            <h1><a href="/index">Mouse vs Cats</a></h1>
+            {% endblock atitle %}
+					</div>
+					<nav><ul>
+              {% if request.user.is_authenticated %}
+							<li class="hi">User: {{ request.user.username }}.</li>
+              <li><a href="{% url 'logout' %}">-> QUIT</a></li>
+              {% else %}
+							<li class="best">Yet another simple board game.</li>
+							{% endif %}
+					</ul></nav>
+				</header>
+			</div>
 
-        <div id="header">
-            {% if request.user.is_authenticated %}
-                Welcome <span class="username">{{ request.user.username }}</span>!
-            {% endif %}
-        </div>
-    </div>
-
-    <hr/>
-
-    {% block content %}
-    {% endblock content %}
-
-    <hr/>
+			<div id="container" class="clear">
+				{% block content %} {% endblock %}
+			</div>
+		</div>
 
     {% block footer %}
+    <footer><p><a href="http://github.com/artiimor/GatoRaton/"><i class="fa fa-github"></i></a></p></footer>
     {% endblock footer %}
+	</div>
 </body>
 </html>

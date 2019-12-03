@@ -1,56 +1,84 @@
 {% extends "mouse_cat/base.html" %}
+{% load staticfiles %}
 
 {% block content %}
-<div id="content">
-    <h1>Play</h1>
-    <p>Game: <b>{{ game.id }}</b></p>
-    <form id="move_form" method="post" action="{% url 'move' %}">
-        {% csrf_token %}
-        <p>
-            Cats: <b>{{ game.cat_user.username }}</b>
-            {% if game.cat_user.id == request.user.id %}
-                <blockquote class="cat">
-                    {% if game.cat_turn %}
-                        {{ move_form }}
-                        <input type="submit" value="Move" />
-                    {% else %}
-                        Waiting for the mouse...
-                        <a style="margin-left:20px;font-weight:normal" href="{% url 'show_game' %}">Refresh</a>
-                    {% endif %}
-                </blockquote>
-            {% endif %}
-        </p>
-        <p>
-            Mouse: <b>{{ game.mouse_user.username }}</b>
-            {% if game.mouse_user.id == request.user.id %}
-                <blockquote class="mouse">
-                    {% if not game.cat_turn %}
-                        {{ move_form }}
-                        <input type="submit" value="Move" />
-                    {% else %}
-                        Waiting for the cat...
-                        <a style="margin-left:20px;font-weight:normal" href="{% url 'show_game' %}">Refresh</a>
-                    {% endif %}
-                </blockquote>
-            {% endif %}
-        </p>
-    </form>
-
+<div id="container">
+    <h1>#{{ game.id }}: Playing{% if game.cat_user.id == request.user.id %} as cats{% else %} as mouse{% endif %}</h1>
+    <p><br>
+      {% if game.cat_user.id == request.user.id and game.cat_turn %} It's your turn!
+      {% elif game.mouse_user.id == request.user.id and not game.cat_turn %} It's your turn!
+      {% elif game.cat_user.id == request.user.id %}Waiting for {{ game.mouse_user.username }}...<a style="margin-left:20px;font-weight:normal" href="{% url 'show_game' %}">Refresh</a>
+      {% else %}Waiting for {{ game.cat_user.username }}...<a style="margin-left:20px;font-weight:normal" href="{% url 'show_game' %}">Refresh</a>
+      {% endif %}
+    </p>
     {% if board %}
-        <p>Board: {{ board }}</p>
+    <div id="board">
         <table id="chess_board">
+        <form id="new_move_form" method="post" action="{% url 'move' %}">
+        {% csrf_token %}
         {% for item in board %}
             {% if forloop.counter0|divisibleby:8 %}<tr>{% endif %}
-            <td id="cell_{{ forloop.counter0}}"" style='width:20px;border:1px solid #000000;text-align:center;'>
-                {% if item ==  0 %}   x
-                {% elif item == 1 %}  &#9922;
-                {% else %}  &#9920; {% endif %}
+            <td id="target_{{ forloop.counter0}}">
+                {% if item ==  0 %}
+                {% elif item == 1 %}
+                <div id="piece_{{ forloop.counter0}}">
+                  <img class="token" src="{% static 'img/cat.png' %}" alt="cat" style="{{cat}}"/>
+                </div>
+                {% elif item == -1 %}
+                <div id="piece_{{ forloop.counter0}}">
+                  <img class="token" src="{% static 'img/mouse.png' %}" alt="mouse" style="{{mouse}}"/>
+                </div>
+                {% endif %}
             </td>
             {% if forloop.counter|divisibleby:8 or forloop.last %}</tr>{% endif %}
         {% endfor %}
+        </form>
         </table>
+        {% if game.cat_user.id == request.user.id and not game.cat_turn %}
+        <div id="overlay"></div>
+        {% elif game.mouse_user.id == request.user.id and game.cat_turn %}
+        <div id="overlay"></div>
+        {% endif %}
+    </div>
     {% endif %}
+    <div class="joinbtn"><a href="{% url 'landing' %}"><-&nbsp;BACK</a></div>
 
-    <p><a href="{% url 'landing' %}">Return to homepage</a></p>
+    <script type="text/javascript">
+    function post(params, method='post') {
+      const form = document.getElementById("new_move_form");
+      for (const key in params) {
+        if (params.hasOwnProperty(key)) {
+          const hiddenField = document.createElement('input');
+          hiddenField.type = 'hidden';
+          hiddenField.name = key;
+          hiddenField.value = params[key];
+          form.appendChild(hiddenField);
+        }
+      }
+      form.submit();
+    }
+    function dropItems(idOfDraggedItem,targetId,x,y) {
+      var targetObj = document.getElementById(targetId);	// Creating reference to target obj
+      var subDivs = targetObj.getElementsByTagName('DIV');	// Number of subdivs
+      if (subDivs.length > 0) return;	// Sub divs exists on target, i.e. element already dragged on it. => return from function without doing anything
+      var sourceObj = document.getElementById(idOfDraggedItem);	// Creating reference to source, i.e. dragged object
+      var numericIdTarget = targetId.replace(/[^0-9]/gi,'')/1;	// Find numeric id of target
+      var numericIdSource = idOfDraggedItem.replace(/[^0-9]/gi,'')/1;	// Find numeric id of source
+      targetObj.appendChild(sourceObj);	// Append
+      var origin = Number(idOfDraggedItem.split("_").pop());
+      var target = Number(targetId.split("_").pop());
+      post({origin: origin, target: target});
+    }
+    var dragDropObj = new DHTMLgoodies_dragDrop();	// Creating drag and drop object
+    for(var cell=0; cell<=64; cell++) {
+      var src = ("piece_").concat(cell.toString());
+      var tgt = ("target_").concat(cell.toString());
+      if(document.getElementById(src))
+        dragDropObj.addSource(src, true);	// Make <div id="box1"> dragable. slide item back into original position after drop
+      if(document.getElementById(tgt))
+        dragDropObj.addTarget(tgt, 'dropItems'); // Set <div id="leftColumn"> as a drop target. Call function dropItems on drop
+    }
+    dragDropObj.init();	// Initizlizing drag and drop object
+    </script>
 </div>
 {% endblock content %}

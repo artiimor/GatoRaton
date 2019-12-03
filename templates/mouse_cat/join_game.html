@@ -1,13 +1,11 @@
 {% extends "mouse_cat/base.html" %}
 
 {% block content %}
-<div id="content">
-    <h1>Join game</h1>
-    {% if msg_error %}
-        <p class="error">ERROR: {{ msg_error }}</p>
-    {% else %}
-        <p><b>{{ game.mouse_user.username }}</b> succesfully joined to game <b>{{ game.id }}</b>. The game can start!!!</p>
-    {% endif %}
-    <p><a href="{% url 'landing' %}">Return to homepage</a></p>
+<div id="container">
+    <h1>Join A New Game:</h1>
+    {% if msg_error %}<h3><br><br>Oops! {{ msg_error }}</h3>
+    {% else %}<p><b>{{ game.mouse_user.username }}</b> succesfully joined to game <b>{{ game.id }}</b>. The game can start!!!</p>
+    {% endif %}<br>
+    <div class="joinbtn"><a href="{% url 'landing' %}"><-&nbsp;BACK</a></div>
 </div>
 {% endblock content %}

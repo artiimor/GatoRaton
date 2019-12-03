@@ -1,16 +1,19 @@
 {% extends "mouse_cat/base.html" %}
 
 {% block content %}
-<div id="content">
-    <h1>Login</h1>
-    Log in to continue:
-    <form id="login_form" method="post" action="{% url 'login' %}">
+<div id="container">
+    <h1>Log In To Play</h1>
+    <br><br>
+    <form id="login_form" method="post" action="{% url 'login' %}" style="width: 320px; margin: 0 auto">
         {% csrf_token %}
         {{ user_form.as_p }}<br/>
-        <input type="hidden" name="return_service" value="{{ return_service }}" />
-        <input type="submit" value="Log-In" />
+        <input type="hidden" name="return_service" value="" />
+        <input type="submit" value="Log In" />
     </form>
-    
-    <p><a href="{% url 'landing' %}">Return to homepage</a></p>
+    <div style="margin: 30px auto; width: 360px; border-top: 3px solid #212121; border-bottom: 3px solid #212121;">
+        <h3><br><br>Don't have an account?<br></h3>
+        <div class="joinbtn"><a href="{% url 'signup' %}">REGISTER HERE</a></div>
+        <h3>and start playing!<br><br><br></h3>
+    </div>
 </div>
 {% endblock content %}

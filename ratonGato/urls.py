@@ -32,5 +32,6 @@ urlpatterns = [
     path('select_game/<int:game_id>/',
          views.select_game_service, name='select_game'),
     path('show_game/', views.show_game_service, name='show_game'),
+    path('gameplay777/', views.gameplay_service, name='gameplay'),
     path('move/', views.move_service, name='move')
 ]

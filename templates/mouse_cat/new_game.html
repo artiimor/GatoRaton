@@ -1,9 +1,10 @@
 {% extends "mouse_cat/base.html" %}
 
 {% block content %}
-<div id="content">
-    <h1>Create game</h1>  
-    <p>Game <b>{{ game.id }}</b> succesfully created by user <b>{{ game.cat_user.username }}</b></p>
-    <p><a href="{% url 'landing' %}">Return to homepage</a></p>
+<div id="container">
+    <h1>Join A New Game:</h1>
+    <h3><br><br>Game <b>{{ game.id }}</b> succesfully created!!</h3>
+    <h3><br>Now let's wait for a mouse to accept the challenge</h3><br>
+    <div class="joinbtn"><a href="{% url 'landing' %}"><-&nbsp;BACK</a></div>
 </div>
 {% endblock content %}

@@ -1,34 +1,50 @@
 {% extends "mouse_cat/base.html" %}
 
 {% block content %}
-<div id="content">
-    <h1>Select game</h1>
-    <p>
-        {% if as_cat %}
-            Games as cat:
-            <ul>
-            {% for game in as_cat %}
-                <li> <a href="{% url 'select_game' game.id %}">{{ game }}</a></li>
-            {% endfor %}
-            </ul>
-        {%  else %}
-            No games as cat
-        {% endif %}
-    </p>
+<div id="container">
+    <h1>Join A New Game:</h1>
+    <div class="joinbtn"><a href="{% url 'create_game' %}">PLAY AS CATS</a></div>
+    <div class="joinbtn"><a href="{% url 'join_game' %}">PLAY AS MOUSE</a></div>
+    {% if as_cat or as_mouse%}
+    <h1><br>Active Games:</h1>
+    <table id="active_games_table" class="games_table">
+      <th>#</th><th>Cat</th><th>Mouse</th><th>Turn</th><th></th>
+      {% if as_cat %}{% for game in as_cat %}
+        <tr>
+          <td>{{game.id}}</td>
+          <td>{{game.cat_user}}</td>
+          <td>{{game.mouse_user}}</td>
+          <td>{% if not game.cat_turn %} Waiting... {% else %} Play now! {% endif %}</td>
+          <td><a href="{% url 'select_game' game.id %}"><i class="fa fa-play-circle" style="font-size:24px"></i></a></td>
+        </tr>
+      {% endfor %}{% endif %}
+      {% if as_mouse %}{% for game in as_mouse %}
+        <tr>
+          <td>{{game.id}}</td>
+          <td>{{game.cat_user}}</td>
+          <td>{{game.mouse_user}}</td>
+          <td>{% if game.cat_turn %} Waiting... {% else %} Play now! {% endif %}</td>
+          <td><a href="{% url 'select_game' game.id %}"><i class="fa fa-play-circle" style="font-size:24px"></i></a></td>
+        </tr>
+      {% endfor %}{% endif %}
+    </table>
+    {% endif %}
 
-    <p>
-        {% if as_mouse %}
-            Games as mouse:
-            <ul>
-            {% for game in as_mouse %}
-                <li> <a href="{% url 'select_game' game.id %}">{{ game }}</a></li>
-            {% endfor %}
-            </ul>
-        {%  else %}
-            No games as mouse
-        {% endif %}
-    </p>
-    
-    <p><a href="{% url 'landing' %}">Return to homepage</a></p>
+    {% if finished_games %}
+    <h1><br>Finished Games:</h1>
+    <table id="finished_games_table" class="games_table">
+      <th></th><th>Cat</th><th>Mouse</th><th>Winner</th><th></th>
+      {% for game in finished_games %}
+      <tr>
+        <td>{{game.id}}</td>
+        <td>{{game.cat_user}}</td>
+        <td>{{game.mouse_user}}</td>
+        <td>{% if game.cat_turn %}{{game.mouse_user}}{% else %}{{game.cat_user}}{% endif %}</td>
+        <td><a href="{% url 'select_game' game.id %}"><i class="fa fa-play-circle" style="font-size:24px"></i></a></td>
+      </tr>
+      {% endfor %}
+    </table>
+    {% endif %}
+    <br><br>
 </div>
 {% endblock content %}

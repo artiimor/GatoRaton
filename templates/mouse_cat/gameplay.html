@@ -1,0 +1,61 @@
+{% extends "mouse_cat/base.html" %}
+{% load staticfiles %}
+{% load app_filters %}
+
+{% block content %}
+<div id="container">
+    <h1>Game Replay</h1>
+    <p><br>Game {{ game.id }}: {{ game.cat_user.username }} vs {{ game.mouse_user.username }}</p>
+    {% if board %}
+    <form id="leform" action="" method="post">
+      {% csrf_token %}
+      <input type="submit" id="button" value="->" />
+    </form>
+    <div id="board">
+        <table id="chess_board">
+        <form id="new_move_form" method="post" action="{% url 'move' %}">
+        {% csrf_token %}
+        {% for item in board %}
+            {% if forloop.counter0|divisibleby:8 %}<tr>{% endif %}
+            <td id="target_{{ forloop.counter0}}">
+                {% if item ==  0 %}
+                {% elif item == 1 %}
+                <div id="piece_{{ forloop.counter0}}">
+                  <img class="token" src="{% static 'img/cat.png' %}" alt="cat" style="{{cat}}"/>
+                </div>
+                {% elif item == -1 %}
+                <div id="piece_{{ forloop.counter0}}">
+                  <img class="token" src="{% static 'img/mouse.png' %}" alt="mouse" style="{{mouse}}"/>
+                </div>
+                {% endif %}
+            </td>
+            {% if forloop.counter|divisibleby:8 or forloop.last %}</tr>{% endif %}
+        {% endfor %}
+        </form>
+        </table>
+        <div id="overlay" style="display: block;"></div>
+    </div>
+    {% endif %}
+
+    <script type="text/javascript">
+    var move_iter = 0;
+    function post(params, method='post') {
+      const form = document.getElementById("leform");
+      for (const key in params) {
+        if (params.hasOwnProperty(key)) {
+          const hiddenField = document.createElement('input');
+          hiddenField.type = 'hidden';
+          hiddenField.name = key;
+          hiddenField.value = params[key];
+          form.appendChild(hiddenField);
+        }
+      }
+      form.submit();
+    }
+    function nextMove() {
+      move_iter++;
+      return false;
+    }
+    </script>
+</div>
+{% endblock content %}

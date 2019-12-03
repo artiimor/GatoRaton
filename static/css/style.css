@@ -1,1 +1,279 @@
-/*Styles here*/
+* { box-sizing: border-box;}
+*:before,*:after { box-sizing: border-box; }
+html, body {
+ height: 100%;
+ position: relative;
+}
+
+body {
+	font-family: 'Press Start 2P', cursive;
+	color: #FFFFFF;
+	background-color: #FFFFFF;
+  margin: 0;
+}
+
+.clear:after { /*Clearfix para floats*/
+	content: "";
+	display: block;
+	clear: both;
+}
+
+a {
+	text-decoration: none;
+	color: #212121;
+}
+
+a:hover {
+	color: #484848;
+}
+
+address, article, aside, figcaption, figure, footer, header, nav, section {
+	display: block;
+	margin: 0;
+}
+
+label {
+	margin-left: 10px;
+	margin-right: 10px;
+}
+
+nav ul, p, h1, h2, h3, h4, h5, h6, form, fieldset {
+  text-transform: uppercase;
+  margin: 0;
+	padding: 0;
+	border: none;
+}
+
+/* --------------------------- Page structure ------------------------------*/
+#page-container {
+	overflow: hidden;
+	display: block;
+  position: relative;
+	min-height: 100vh;
+}
+
+#content-wrap {
+	margin: 0;
+	background-color: #FFFFFF;
+	color: #212121;
+}
+
+footer {
+	position: absolute;
+  bottom: 0;
+  width: 100%;
+	text-align: center;
+	background-color: #212121;
+}
+
+footer p, footer a {
+	color: #DEDEDE;
+	font-size: 30px;
+	margin: 2px 0 8px 0;
+}
+
+div.top {
+	background-color: #212121;
+}
+
+#header {
+	width: 100%;
+	margin: 0 auto;
+	padding: 20px 0 10px 0;
+}
+
+#header a {
+  color: #DEDEDE;
+}
+
+#header #hgroup {
+	text-align: center;
+	margin: 0 0 10px 0;
+}
+
+#header nav {
+	display: block;
+	width: 100%;
+	margin: 0;
+	padding: 12px 0;
+	font-weight: bold;
+	font-size: 12px;
+	background-color: #212121;
+	clear: both;
+}
+
+#header ul {
+	padding: 0 20px;
+	font-size: 12px;
+	text-align: center;
+}
+
+#header nav li {
+	display: inline-block;
+	color: #C0BAB6;
+	margin-right: 30px;
+	font-weight: normal;
+}
+
+#header nav li.best {
+	margin-right: 0;
+}
+
+#header nav li a {
+  border: 3px solid #DEDEDE;
+  padding: 8px;
+	color: #DEDEDE;
+	font-weight: bold;
+}
+
+#header nav li a:hover {
+  border: 3px solid #C0BAB6;
+	color: #C0BAB6;
+}
+
+#header h1 {
+  font-size: 2em;
+}
+
+/*---------------------------- Contenido -----------------------------------*/
+#container {
+	font-size: 10px;
+	padding: 15px 0 20px 0;
+  text-align: center;
+	width: 100%;
+	margin: 0 auto;
+  overflow-x: auto;
+}
+
+img {
+	vertical-align: middle;
+}
+
+ul.errorlist {display: none;}
+
+/*------------ Media tags -------------------------*/
+@media (max-width: 650px) {
+	#sign {width: 100%;}
+}
+@media (max-width: 550px) {
+	#header nav ul {
+		text-align: center;
+		padding: 0 20px;
+	}
+	#header nav li {
+		padding: 0;
+		margin: 0 20px;
+	}
+	#header nav li.hi {
+		display: block;
+		padding: 0 0 10px 0;
+		margin: 0;
+	}
+	div.top {
+		margin: 0;
+	}
+}
+@media (max-width: 408px) {
+	#header nav li {
+		margin: 0 5px;
+	}
+	#header nav li.hi {
+		padding: 0 0 7px 0;
+	}
+}
+
+
+/*------------- BOARD -----------------------------*/
+#board {
+	width: 360px;
+	margin: 10px auto 0 auto;
+}
+
+form {
+  font-size: 12px;
+}
+
+form input[type=text], form input[type=password], form input[type=submit] {
+  border: 3px solid #212121;
+  background-color: white;
+  font-family: 'Press Start 2P', cursive;
+  font-size: 13px;
+  padding: 8px;
+  margin: 8px 0 18px 0;
+  max-width: 200px;
+}
+
+form input[type=submit] {
+  margin-top: -10px;
+  cursor: pointer;
+  text-transform: uppercase;
+}
+
+.joinbtn { display: inline-block; }
+.joinbtn a {
+  font-size: 14px;
+  margin: 15px 6px;
+  display: inline-block;
+  padding: 5px;
+  border: 3px solid #212121;
+}
+.joinbtn a:hover{
+  cursor: pointer;
+  border: 3px solid #4D4D4D;
+}
+
+.games_table {
+	background-color: #FFFFFF;
+  margin: 20px auto;
+  border-collapse: collapse;
+  overflow-x: auto;
+}
+.games_table td {
+  font-size: 12px;
+  border: 3px solid #212121;
+  padding: 8px 8px 8px 14px;
+}
+.games_table th {
+  font-size: 14px;
+  border: 3px solid #212121;
+	border-bottom-color: #212121;
+  padding: 8px 8px 8px 14px;
+  background-color: #212121;
+  color: white;
+}
+#overlay {
+  position: absolute;
+	top: 182px;
+  width: 360px;
+  height: 373px;
+	text-align: center;
+  background-color: gray;
+  opacity: 0;
+}
+
+#chess_board {
+	border-collapse: collapse;
+	border: 4px solid #3D3D3D;
+}
+
+#chess_board td {
+	background:#fff;
+	height: 45px;
+	width: 45px;
+	text-align: center;
+	border: 3px solid #8D8D8D;
+	margin: 0;
+	padding: 0;
+}
+
+#chess_board tr:nth-child(odd) td:nth-child(even),
+#chess_board tr:nth-child(even) td:nth-child(odd) {
+	background:#ccc;
+}
+
+.token {
+	height: 40px;
+	width: 40px;
+	margin: 0;
+	padding: 0;
+}

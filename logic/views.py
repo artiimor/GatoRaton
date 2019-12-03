@@ -29,7 +29,7 @@ def errorHTTP(request, exception=None):
 
 
 def index(request):
-    return render(request, "mouse_cat/index.html")
+    return redirect(reverse('select_game'))
 
 
 @anonymous_required
@@ -52,7 +52,6 @@ def login_service(request):
 def logout_service(request):
     # Also the same in tango with django
     logout(request)
-
     return redirect(reverse('index'))
 
 
@@ -75,7 +74,6 @@ def signup_service(request):
 
 
 def counter_service(request):
-
     # If there is no counter we create it
     if 'counter' not in request.session:
         request.session['counter'] = 1
@@ -92,7 +90,6 @@ def counter_service(request):
 
 @login_required
 def create_game_service(request):
-
     # create the game
     game = Game(cat_user=request.user)
     game.save()
@@ -101,11 +98,10 @@ def create_game_service(request):
 
 @login_required
 def join_game_service(request):
-
     # If there are no games to join, render error message
     if Game.objects.count() == 0:
         return render(request, "mouse_cat/join_game.html",
-                      {'msg_error': "There is no available games"})
+                      {'msg_error': "No games to join! Let a cat start a game first!"})
 
     # Get game with greater id
     games = Game.objects.filter(mouse_user=None)
@@ -113,15 +109,14 @@ def join_game_service(request):
         filter(lambda g: g.cat_user != request.user, games))), default=None)
     if id_game is None:
         return render(request, "mouse_cat/join_game.html",
-                      {'msg_error': "There is no available games"})
+                      {'msg_error': "No games to join! Let a cat start a game first!"})
 
     game = Game.objects.get(id=id_game)
 
     # User joins the game
     game.mouse_user = request.user
     game.save()
-
-    return render(request, "mouse_cat/join_game.html", {'game': game})
+    return redirect(reverse('select_game'))
 
 
 @login_required
@@ -137,21 +132,24 @@ def select_game_service(request, game_id=-1):
         as_cat = Game.objects.filter(cat_user=user, status=GameStatus.ACTIVE)
         as_mouse = Game.objects.filter(
             mouse_user=user, status=GameStatus.ACTIVE)
-
+        finished_games = Game.objects.filter(status=GameStatus.FINISHED)
         context_dict['as_cat'] = as_cat
         context_dict['as_mouse'] = as_mouse
+        context_dict['finished_games'] = finished_games
 
         return render(request, "mouse_cat/select_game.html", context_dict)
 
     # POST in a bad way
     game = Game.objects.filter(id=game_id).first()
-    if not game or game.status != GameStatus.ACTIVE:
+    if not game or (game.status != GameStatus.ACTIVE and game.status != GameStatus.FINISHED):
         return HttpResponseNotFound(constants.ERROR_NOT_FOUND)
     else:
+        if game.status == GameStatus.FINISHED:
+            request.session['game_id'] = game.id
+            return redirect(reverse('gameplay'))
         if game.cat_user == user or game.mouse_user == user:
             request.session['game_id'] = game.id
             return redirect(reverse('show_game'))
-
         else:
             return HttpResponseNotFound(constants.ERROR_NOT_FOUND)
 
@@ -180,6 +178,29 @@ def show_game_service(request):
     context_dict['move_form'] = MoveForm()
 
     return render(request, "mouse_cat/game.html", context_dict)
+
+
+@login_required
+def gameplay_service(request):
+    context_dict = {}
+
+    if 'game_id' not in request.session:
+        return redirect(reverse('index'))
+
+    game = Game.objects.get(id=request.session['game_id'])
+
+    context_dict['game'] = game
+    context_dict['board'] = game.get_game_cells()
+    context_dict['move_form'] = MoveForm()
+
+    moves = Move.objects.all().filter(game_id=request.session['game_id'])
+    context_dict['origins'] = []
+    context_dict['targets'] = []
+    for move in moves:
+        context_dict['origins'].append(move.origin)
+        context_dict['targets'].append(move.target)
+
+    return render(request, "mouse_cat/gameplay.html", context_dict)
 
 
 @login_required
