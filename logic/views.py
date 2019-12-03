@@ -29,7 +29,9 @@ def errorHTTP(request, exception=None):
 
 
 def index(request):
-    return redirect(reverse('select_game'))
+    if request.user.is_authenticated:
+        return redirect(reverse('select_game'))
+    return redirect(reverse('login'))
 
 
 @anonymous_required
