@@ -31,6 +31,7 @@ SECRET_KEY = 'f&gyrc*h+-+h20mbvr0gatnphuk38m57884=!yo_9*#epfq#73'
 DEBUG = True
 
 ALLOWED_HOSTS = [u'hidden-cove-11261.herokuapp.com',
+                 u'mats.herokuapp.com'
                  u'localhost', u'127.0.0.1']
 
 # Application definition
