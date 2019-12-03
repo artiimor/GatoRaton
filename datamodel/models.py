@@ -94,6 +94,8 @@ class Game(models.Model):
         return alternatives
 
     def mouse_is_trapped(self):
+        if self.cat_turn is False:
+            return False
         for target in self.mouse_alternatives():
             if target not in self.get_cat_positions():
                 return False
