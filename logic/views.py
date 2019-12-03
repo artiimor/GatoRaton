@@ -1,4 +1,5 @@
 from django.http import HttpResponseForbidden, HttpResponseNotFound
+from django.http import JsonResponse
 from django.shortcuts import render
 from django.shortcuts import redirect
 from django.urls import reverse
@@ -9,6 +10,10 @@ from django.core.exceptions import ValidationError
 from datamodel import constants
 from datamodel.models import Game, Move, Counter, GameStatus
 from logic.forms import SignupForm, LogInForm, MoveForm
+
+
+#Global variable for get_move_service
+playhead = -1
 
 
 def anonymous_required(f):
@@ -126,18 +131,16 @@ def select_game_service(request, game_id=-1):
     context_dict = {}
 
     user = request.user
-
-    # Movida mazo cutre con game_id
-    # The get in a bad way
     if game_id == -1:
         # if method is get we show all the games
-        as_cat = Game.objects.filter(cat_user=user, status=GameStatus.ACTIVE)
-        as_mouse = Game.objects.filter(
-            mouse_user=user, status=GameStatus.ACTIVE)
-        finished_games = Game.objects.filter(status=GameStatus.FINISHED)
-        context_dict['as_cat'] = as_cat
-        context_dict['as_mouse'] = as_mouse
-        context_dict['finished_games'] = finished_games
+        as_c = Game.objects.filter(cat_user=user, status=GameStatus.ACTIVE)
+        as_m = Game.objects.filter(mouse_user=user, status=GameStatus.ACTIVE)
+        fg_c = Game.objects.filter(cat_user=user, status=GameStatus.FINISHED)
+        fg_m = Game.objects.filter(mouse_user=user, status=GameStatus.FINISHED)
+        fg = fg_c | fg_m
+        context_dict['as_cat'] = as_c
+        context_dict['as_mouse'] = as_m
+        context_dict['finished_games'] = fg
 
         return render(request, "mouse_cat/select_game.html", context_dict)
 
@@ -154,6 +157,35 @@ def select_game_service(request, game_id=-1):
             return redirect(reverse('show_game'))
         else:
             return HttpResponseNotFound(constants.ERROR_NOT_FOUND)
+
+
+@login_required
+def get_move_service(request):
+    global playhead
+
+    if request.method != 'POST' or "shift" not in request.POST or 'game_id' not in request.session:
+        return HttpResponseNotFound()
+
+    game = Game.objects.get(id=request.session['game_id'])
+    shift = int(request.POST.get("shift"))
+    moves = Move.objects.all().filter(game_id=request.session['game_id'])
+    origins = []
+    targets = []
+    prev = True
+    next = True
+    for move in moves:
+        origins.append(move.origin)
+        targets.append(move.target)
+
+    if shift >= 0:
+        playhead += int(shift)
+        if playhead == len(origins)-1: next = False
+        dict = {'origin': origins[playhead], 'target': targets[playhead], 'previous': prev, 'next': next}
+    else:
+        if playhead == 0: prev = False
+        dict = {'origin': targets[playhead], 'target': origins[playhead], 'previous': prev, 'next': next}
+        playhead += int(shift)
+    return JsonResponse(dict)
 
 
 @login_required
