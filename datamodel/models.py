@@ -20,6 +20,7 @@ class Game(models.Model):
                                    on_delete=models.CASCADE)
     MIN_CELL = 0
     MAX_CELL = 63
+    cat_wins = models.BooleanField(null=False, default=True)
 
     # The cats and mouse are ints with the position
     # range is [0, 63]
@@ -94,17 +95,17 @@ class Game(models.Model):
         return alternatives
 
     def mouse_is_trapped(self):
-        if self.cat_turn is False:
-            return False
         for target in self.mouse_alternatives():
             if target not in self.get_cat_positions():
                 return False
         self.status = GameStatus.FINISHED
+        self.cat_wins = True
         return True
 
     def mouse_at_top(self):
         if int(self.mouse/8) <= int(min(self.get_cat_positions())/8):
             self.status = GameStatus.FINISHED
+            self.cat_wins = False
             return True
         return False
 

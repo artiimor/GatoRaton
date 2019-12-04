@@ -3,8 +3,8 @@
 {% block content %}
 <div id="container">
     <h1>Join A New Game:</h1>
-    <div class="joinbtn"><a href="{% url 'create_game' %}">PLAY AS CATS</a></div>
-    <div class="joinbtn"><a href="{% url 'join_game' %}">PLAY AS MOUSE</a></div>
+    <div class="joinbtn" style="margin-bottom: 0"><a href="{% url 'create_game' %}">PLAY AS CATS</a></div>
+    <div class="joinbtn" style="margin-bottom: 0"><a href="{% url 'join_game' %}">PLAY AS MOUSE</a></div>
     {% if as_cat or as_mouse%}
     <h1><br>Active Games:</h1>
     <table id="active_games_table" class="games_table">
@@ -33,13 +33,21 @@
     {% if finished_games %}
     <h1><br>Finished Games:</h1>
     <table id="finished_games_table" class="games_table">
-      <th></th><th>Cat</th><th>Mouse</th><th>Winner</th><th></th>
+      <th></th><th>Cat</th><th>Mouse</th><th>W/L</th><th></th>
       {% for game in finished_games %}
       <tr>
         <td>{{game.id}}</td>
         <td>{{game.cat_user}}</td>
         <td>{{game.mouse_user}}</td>
-        <td>{% if game.cat_turn %}{{game.mouse_user}}{% else %}{{game.cat_user}}{% endif %}</td>
+        <td>
+          {% if game.cat_user.id == request.user.id and game.cat_wins %}
+          <p style="color: #4CAF50;">W</p>
+          {% elif game.mouse_user.id == request.user.id and not game.cat_wins %}
+          <p style="color: #4CAF50;">W</p>
+          {% else %}
+          <p style="color: #F44336;">L</p>
+          {% endif %}
+        </td>
         <td><a href="{% url 'select_game' game.id %}"><i class="fa fa-play-circle" style="font-size:24px"></i></a></td>
       </tr>
       {% endfor %}

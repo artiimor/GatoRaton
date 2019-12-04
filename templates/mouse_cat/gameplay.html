@@ -4,14 +4,23 @@
 
 {% block content %}
 <div id="container">
-    <h1>Game Replay</h1>
-    <p><br>Game {{ game.id }}: {{ game.cat_user.username }} vs {{ game.mouse_user.username }}</p>
+    <h1>#{{ game.id }}: Replay
+    {% if game.cat_user.id == request.user.id and game.cat_wins %}
+    (<font color="#4CAF50;">W</font>)
+    {% elif game.mouse_user.id == request.user.id and not game.cat_wins %}
+    (<font color="#4CAF50;">W</font>)
+    {% else %}
+    (<font color="#F44336;">L</font>)
+    {% endif %}
+
+    <div id="tabletop">
+      <div class="joinbtn"><a href="{% url 'landing' %}"><-</a></div>
+      <div class="joinbtn"><a href="{% url 'landing' %}">|></a></div>
+      <div class="joinbtn"><a href="{% url 'landing' %}">||</a></div>
+      <div class="joinbtn"><a href="{% url 'landing' %}">-></a></div>
+    </div>
     {% if board %}
-    <form id="leform" action="" method="post">
-      {% csrf_token %}
-      <input type="submit" id="button" value="->" />
-    </form>
-    <div id="board">
+    <div id="board" style="margin-top: 0">
         <table id="chess_board">
         <form id="new_move_form" method="post" action="{% url 'move' %}">
         {% csrf_token %}
@@ -33,9 +42,9 @@
         {% endfor %}
         </form>
         </table>
-        <div id="overlay" style="display: block;"></div>
     </div>
     {% endif %}
+    <div class="joinbtn"><a href="{% url 'landing' %}"><-&nbsp;BACK</a></div>
 
     <script type="text/javascript">
     var move_iter = 0;
