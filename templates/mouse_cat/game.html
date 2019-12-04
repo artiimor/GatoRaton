@@ -5,7 +5,7 @@
 <div id="container">
     <h1>#{{ game.id }}: Playing{% if game.cat_user.id == request.user.id %} as cats{% else %} as mouse{% endif %}</h1>
     <div id="tabletop">
-      <p><br>
+      <p>
       {% if game.cat_user.id == request.user.id and game.cat_turn %} It's your turn!
       {% elif game.mouse_user.id == request.user.id and not game.cat_turn %} It's your turn!
       {% elif game.cat_user.id == request.user.id %}Waiting for {{ game.mouse_user.username }}...<a style="margin-left:20px;font-weight:normal" href="{% url 'show_game' %}">Refresh</a>

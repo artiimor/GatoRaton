@@ -197,6 +197,14 @@ form input[type=submit] {
   border: 3px solid #4D4D4D;
 }
 
+#tabletop {
+  margin: 16px auto;
+}
+
+#tabletop .joinbtn a {
+  margin: 0 auto;
+}
+
 .games_table {
 	background-color: #FFFFFF;
   margin: 12px auto;
@@ -223,7 +231,7 @@ form input[type=submit] {
   height: 373px;
 	text-align: center;
   background-color: gray;
-  opacity: 0.5;
+  opacity: 0;
 }
 
 #chess_board {
