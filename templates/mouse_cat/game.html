@@ -73,6 +73,8 @@
         post({origin: origin, target: target});
       }
     }
+    //Less than ideal full page reload every 5 sec
+    setTimeout(function(){location.reload();},5000);
     </script>
 </div>
 {% endblock content %}
