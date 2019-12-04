@@ -20,7 +20,7 @@
         {% csrf_token %}
         {% for item in board %}
             {% if forloop.counter0|divisibleby:8 %}<tr>{% endif %}
-            <td id="target_{{ forloop.counter0}}" onclick="source(this)">
+            <td id="target_{{ forloop.counter0}}" onclick="clickFunction(this)">
                 {% if item ==  0 %}
                 {% elif item == 1 %}
                 <div id="piece_{{ forloop.counter0}}">
@@ -58,6 +58,25 @@
         }
       }
       form.submit();
+    }
+    var clicks = 1;
+    var origin = -1;
+    var target = -1;
+    function clickFunction(cell) {
+      var subDivs = cell.getElementsByTagName('DIV');
+      if (clicks == 1) {
+        if (subDivs.length < 1) return;
+        clicks++;
+        origin = Number(cell.id.split("_").pop());
+        return;
+      }
+      if (clicks == 2) {
+        if (subDivs.length > 0) return;
+        clicks = 1;
+        target = Number(cell.id.split("_").pop());
+        post({origin: origin, target: target});
+        return;
+      }
     }
     function dropItems(idOfDraggedItem,targetId,x,y) {
       var targetObj = document.getElementById(targetId);	// Creating reference to target obj
