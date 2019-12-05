@@ -44,6 +44,30 @@ nav ul, p, h1, h2, h3, h4, h5, h6, form, fieldset {
 	border: none;
 }
 
+button {
+  font-family: 'Press Start 2P', cursive;
+	color: #212121;
+	background-color: #FFFFFF;
+  border: 3px solid #212121;
+  font-size: 18px;
+  letter-spacing: -11px;
+  text-align: center;
+  width: 80px;
+  padding: 5px 14px 3px 4px;
+  margin: 0 2px;
+}
+button:hover{
+  color: #4D4D4D;
+  cursor: pointer;
+  border: 3px solid #4D4D4D;
+}
+button:disabled, button:disabled:hover {
+  cursor: default;
+  background-color: #DEDEDE;
+  color: #616161;
+  border: 3px solid #616161;
+}
+
 /* --------------------------- Page structure ------------------------------*/
 #page-container {
 	overflow: hidden;

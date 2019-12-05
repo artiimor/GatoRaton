@@ -1,0 +1,93 @@
+{% extends "mouse_cat/base.html" %}
+{% load staticfiles %}
+{% load app_filters %}
+
+{% block content %}
+<div id="container">
+    <h1 id="whowins">#{{ game.id }}: Replay</h1>
+    <div id="tabletop">
+      <div class="joinbtn"><button id="prevbtn" disabled>|<|</button></div>
+      <div class="joinbtn"><button id="playbtn">|></button></div>
+      <div class="joinbtn"><button id="nextbtn">|>|</button></div>
+    </div>
+    {% if board %}
+    <div id="board" style="margin-top: 0">
+        <table id="chess_board">
+        <form id="get_move_form" method="post" action="{% url 'get_move' %}">
+        {% csrf_token %}
+        {% for item in board %}
+            {% if forloop.counter0|divisibleby:8 %}<tr>{% endif %}
+            <td id="target_{{ forloop.counter0}}">
+                {% if item ==  0 %}
+                {% elif item == 1 %}
+                <div id="piece_{{ forloop.counter0}}">
+                  <img class="token" src="{% static 'img/cat.png' %}" alt="cat" style="{{cat}}"/>
+                </div>
+                {% elif item == -1 %}
+                <div id="piece_{{ forloop.counter0}}">
+                  <img class="token" src="{% static 'img/mouse.png' %}" alt="mouse" style="{{mouse}}"/>
+                </div>
+                {% endif %}
+            </td>
+            {% if forloop.counter|divisibleby:8 or forloop.last %}</tr>{% endif %}
+        {% endfor %}
+        </form>
+        </table>
+    </div>
+    {% endif %}
+    <div class="joinbtn"><a href="{% url 'landing' %}"><-&nbsp;BACK</a></div>
+
+    <script type="text/javascript">
+      $(document).ready(function(){
+        $('#nextbtn').on('click', function() {
+          $.ajax({
+              url: "{% url 'get_move' %}", type: "POST", dataType: "json",
+              data: {"shift": "1", csrfmiddlewaretoken: '{{ csrf_token }}'},
+              success: function(data) {
+                  var fig = $("#target_" + data.origin).html();
+                  $("#target_" + data.origin).html(" ");
+                  $("#target_" + data.target).html(fig);
+                  $("#prevbtn").prop('disabled', false);
+                  if (data.next == false) {
+                    $("#nextbtn").prop('disabled', true);
+                    $("#whowins").html("#{{ game.id }}: Replay. ({%if game.cat_wins%}{{game.cat_user.username}}{%else%}{{game.mouse_user.username}}{%endif%} WON!)");
+                  }
+              }
+          });
+        });
+        $('#prevbtn').on('click', function() {
+          $.ajax({
+              url: "{% url 'get_move' %}", type: "POST", dataType: "json",
+              data: {"shift": "-1", csrfmiddlewaretoken: '{{ csrf_token }}'},
+              success: function(data) {
+                  var fig = $("#target_" + data.origin).html();
+                  $("#nextbtn").prop('disabled', false);
+                  $("#whowins").html("#{{ game.id }}: Replay");
+                  $("#target_" + data.origin).html(" ");
+                  $("#target_" + data.target).html(fig);
+                  if (data.previous == false) {
+                    $("#prevbtn").prop('disabled', true);
+                  }
+              }
+          });
+        });
+        var myInterval = -1;
+        $('#playbtn').on('click', function() {
+          if (myInterval == -1) {
+            $('#playbtn').html("||");
+            myInterval = setInterval(function(){
+              if ($("#nextbtn").prop('disabled') == false) {
+                $("#nextbtn").click();
+              }
+            }, 2000);
+          }
+          else {
+            $('#playbtn').html("|>");
+            clearInterval(myInterval);
+            myInterval = -1;
+          }
+        });
+      });
+    </script>
+</div>
+{% endblock content %}

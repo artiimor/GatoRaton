@@ -69,6 +69,14 @@ class Game(models.Model):
     def get_cat_positions(self):
         return [self.cat1, self.cat2, self.cat3, self.cat4]
 
+    def get_game_initial_cells(self):
+        game_cells = []
+        for i in range(0, 64):
+            game_cells.append(0)
+        game_cells[59] = -1
+        game_cells[0] = game_cells[2] = game_cells[4] = game_cells[6] = 1
+        return game_cells
+
     def get_game_cells(self):
         game_cells = []
         for i in range(0, 64):

@@ -33,6 +33,6 @@ urlpatterns = [
          views.select_game_service, name='select_game'),
     path('show_game/', views.show_game_service, name='show_game'),
     path('get_move/', views.get_move_service, name='get_move'),
-    path('gameplay777/', views.gameplay_service, name='gameplay'),
+    path('replay/', views.replay_service, name='replay'),
     path('move/', views.move_service, name='move')
 ]

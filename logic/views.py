@@ -6,14 +6,11 @@ from django.urls import reverse
 from django.contrib.auth import authenticate, login, logout
 from django.contrib.auth.decorators import login_required
 from django.core.exceptions import ValidationError
+import json
 
 from datamodel import constants
 from datamodel.models import Game, Move, Counter, GameStatus
 from logic.forms import SignupForm, LogInForm, MoveForm
-
-
-#Global variable for get_move_service
-playhead = -1
 
 
 def anonymous_required(f):
@@ -34,6 +31,7 @@ def errorHTTP(request, exception=None):
 
 
 def index(request):
+    request.session['playhead'] = -1
     if request.user.is_authenticated:
         return redirect(reverse('select_game'))
     return redirect(reverse('login'))
@@ -41,6 +39,7 @@ def index(request):
 
 @anonymous_required
 def login_service(request):
+    request.session['playhead'] = -1
     user_form = LogInForm()
     if request.method == 'POST':
         user_form = LogInForm(data=request.POST)
@@ -57,13 +56,14 @@ def login_service(request):
 
 @login_required
 def logout_service(request):
-    # Also the same in tango with django
+    request.session['playhead'] = -1
     logout(request)
     return redirect(reverse('index'))
 
 
 @anonymous_required
 def signup_service(request):
+    request.session['playhead'] = -1
     user_form = SignupForm()
     if request.method == 'POST':
         user_form = SignupForm(data=request.POST)
@@ -81,6 +81,7 @@ def signup_service(request):
 
 
 def counter_service(request):
+    request.session['playhead'] = -1
     # If there is no counter we create it
     if 'counter' not in request.session:
         request.session['counter'] = 1
@@ -97,6 +98,7 @@ def counter_service(request):
 
 @login_required
 def create_game_service(request):
+    request.session['playhead'] = -1
     # create the game
     game = Game(cat_user=request.user)
     game.save()
@@ -105,6 +107,7 @@ def create_game_service(request):
 
 @login_required
 def join_game_service(request):
+    request.session['playhead'] = -1
     # If there are no games to join, render error message
     if Game.objects.count() == 0:
         return render(request, "mouse_cat/join_game.html",
@@ -128,6 +131,7 @@ def join_game_service(request):
 
 @login_required
 def select_game_service(request, game_id=-1):
+    request.session['playhead'] = -1
     context_dict = {}
 
     user = request.user
@@ -151,7 +155,7 @@ def select_game_service(request, game_id=-1):
     else:
         if game.status == GameStatus.FINISHED:
             request.session['game_id'] = game.id
-            return redirect(reverse('gameplay'))
+            return redirect(reverse('replay'))
         if game.cat_user == user or game.mouse_user == user:
             request.session['game_id'] = game.id
             return redirect(reverse('show_game'))
@@ -161,12 +165,13 @@ def select_game_service(request, game_id=-1):
 
 @login_required
 def get_move_service(request):
-    global playhead
 
     if request.method != 'POST' or "shift" not in request.POST or 'game_id' not in request.session:
         return HttpResponseNotFound()
 
-    game = Game.objects.get(id=request.session['game_id'])
+    if 'playhead' not in request.session:
+        request.session['playhead'] = -1
+
     shift = int(request.POST.get("shift"))
     moves = Move.objects.all().filter(game_id=request.session['game_id'])
     origins = []
@@ -178,34 +183,34 @@ def get_move_service(request):
         targets.append(move.target)
 
     if shift >= 0:
-        playhead += int(shift)
-        if playhead == len(origins)-1: next = False
-        dict = {'origin': origins[playhead], 'target': targets[playhead], 'previous': prev, 'next': next}
+        request.session['playhead'] += int(shift)
+        if request.session['playhead'] == len(origins)-1:
+            next = False
+        if request.session['playhead'] >= len(origins):
+            request.session['playhead'] -= int(shift)
+        dict = {'origin': origins[request.session['playhead']], 'target': targets[request.session['playhead']], 'previous': prev, 'next': next}
     else:
-        if playhead == 0: prev = False
-        dict = {'origin': targets[playhead], 'target': origins[playhead], 'previous': prev, 'next': next}
-        playhead += int(shift)
+        if request.session['playhead'] <= 0:
+            prev = False
+        if request.session['playhead'] < 0:
+            request.session['playhead'] = 0
+        dict = {'origin': targets[request.session['playhead']], 'target': origins[request.session['playhead']], 'previous': prev, 'next': next}
+        request.session['playhead'] += int(shift)
     return JsonResponse(dict)
 
 
 @login_required
 def show_game_service(request):
+    request.session['playhead'] = -1
     context_dict = {}
 
     if 'game_id' not in request.session:
         return redirect(reverse('index'))
 
     game = Game.objects.get(id=request.session['game_id'])
-    if game.mouse_is_trapped():
+    if game.mouse_is_trapped() or game.mouse_at_top():
         game.status = GameStatus.FINISHED
         game.save()
-        return render(request, "mouse_cat/game_finished.html",
-                      {'winner': "Cats"})
-    if game.mouse_at_top():
-        game.status = GameStatus.FINISHED
-        game.save()
-        return render(request, "mouse_cat/game_finished.html",
-                      {'winner': "Mouse"})
 
     context_dict['game'] = game
     context_dict['board'] = game.get_game_cells()
@@ -215,31 +220,21 @@ def show_game_service(request):
 
 
 @login_required
-def gameplay_service(request):
+def replay_service(request):
     context_dict = {}
 
     if 'game_id' not in request.session:
         return redirect(reverse('index'))
 
     game = Game.objects.get(id=request.session['game_id'])
-
     context_dict['game'] = game
-    context_dict['board'] = game.get_game_cells()
-    context_dict['move_form'] = MoveForm()
-
-    moves = Move.objects.all().filter(game_id=request.session['game_id'])
-    context_dict['origins'] = []
-    context_dict['targets'] = []
-    for move in moves:
-        context_dict['origins'].append(move.origin)
-        context_dict['targets'].append(move.target)
-
-    return render(request, "mouse_cat/gameplay.html", context_dict)
+    context_dict['board'] = game.get_game_initial_cells()
+    return render(request, "mouse_cat/replay.html", context_dict)
 
 
 @login_required
 def move_service(request):
-
+    request.session['playhead'] = -1
     # Check if there's a user
     if not request.user:
         return redirect(reverse('login'))

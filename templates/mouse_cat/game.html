@@ -6,10 +6,11 @@
     <h1>#{{ game.id }}: Playing{% if game.cat_user.id == request.user.id %} as cats{% else %} as mouse{% endif %}</h1>
     <div id="tabletop">
       <p>
-      {% if game.cat_user.id == request.user.id and game.cat_turn %} It's your turn!
+      {% if game.status == 2 %} Game finished! {% if game.cat_wins %}{{game.cat_user.username}}{% else %}{{game.mouse_user.username}}{% endif %} wins!
+      {% elif game.cat_user.id == request.user.id and game.cat_turn %} It's your turn!
       {% elif game.mouse_user.id == request.user.id and not game.cat_turn %} It's your turn!
-      {% elif game.cat_user.id == request.user.id %}Waiting for {{ game.mouse_user.username }}...<a style="margin-left:20px;font-weight:normal" href="{% url 'show_game' %}">Refresh</a>
-      {% else %}Waiting for {{ game.cat_user.username }}...<a style="margin-left:20px;font-weight:normal" href="{% url 'show_game' %}">Refresh</a>
+      {% elif game.cat_user.id == request.user.id %}Waiting for {{ game.mouse_user.username }}...
+      {% else %}Waiting for {{ game.cat_user.username }}...
       {% endif %}
       </p>
     </div>
@@ -36,7 +37,9 @@
         {% endfor %}
         </form>
         </table>
-        {% if game.cat_user.id == request.user.id and not game.cat_turn %}
+        {% if game.status == 2 %}
+        <div id="overlay"></div>
+        {% elif game.cat_user.id == request.user.id and not game.cat_turn %}
         <div id="overlay"></div>
         {% elif game.mouse_user.id == request.user.id and game.cat_turn %}
         <div id="overlay"></div>
@@ -73,7 +76,6 @@
         post({origin: origin, target: target});
       }
     }
-    //Less than ideal full page reload every 5 sec
     setTimeout(function(){location.reload();},5000);
     </script>
 </div>
