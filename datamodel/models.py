@@ -91,8 +91,6 @@ class Game(models.Model):
     def mouse_alternatives(self):
         alternatives = []
         m = self.mouse
-        print("MOUSE")
-        print(m)
         # alternatives in the four directions, if they are valid
         if self.cell_is_valid(m-9):
             alternatives.append(m-9)
@@ -102,15 +100,9 @@ class Game(models.Model):
             alternatives.append(m+7)
         if self.cell_is_valid(m+9):
             alternatives.append(m+9)
-        print("ALTERNATIVAS")
-        print(alternatives)
         return alternatives
 
     def mouse_is_trapped(self):
-        print("POSICIONES GATOS: ")
-        print(self.get_cat_positions())
-        print("ALTERNATIVAS RATON: ")
-        print(self.mouse_alternatives())
         for aux in self.mouse_alternatives():
             if aux not in self.get_cat_positions():
                 return False
@@ -202,10 +194,10 @@ class Move(models.Model):
         if self.game.status != GameStatus.ACTIVE:
             raise ValidationError(constants.MSG_ERROR_MOVE)
 
+        origin = int(self.origin)
+
         # If is cat_turn, then the player must be the cat
         if self.player == self.game.cat_user and self.game.cat_turn:
-
-            origin = int(self.origin)
 
             if self.cat_moving_well():
                 if origin is self.game.cat1:
@@ -226,7 +218,7 @@ class Move(models.Model):
 
         # If is mouse turn
         elif self.player == self.game.mouse_user and not self.game.cat_turn \
-                and self.mouse_moving_well():
+                and self.mouse_moving_well() and origin is self.game.mouse:
             self.game.mouse = self.target
             self.game.cat_turn = True
             self.game.save()
