@@ -6,6 +6,7 @@ from django.urls import reverse
 from django.contrib.auth import authenticate, login, logout
 from django.contrib.auth.decorators import login_required
 from django.core.exceptions import ValidationError
+from django.core.paginator import Paginator
 import json
 
 from datamodel import constants
@@ -135,17 +136,41 @@ def select_game_service(request, game_id=-1):
     context_dict = {}
 
     user = request.user
-    if game_id == -1:
-        # if method is get we show all the games
-        as_c = Game.objects.filter(cat_user=user, status=GameStatus.ACTIVE)
-        as_m = Game.objects.filter(mouse_user=user, status=GameStatus.ACTIVE)
-        fg_c = Game.objects.filter(cat_user=user, status=GameStatus.FINISHED)
-        fg_m = Game.objects.filter(mouse_user=user, status=GameStatus.FINISHED)
-        fg = fg_c | fg_m
-        context_dict['as_cat'] = as_c
-        context_dict['as_mouse'] = as_m
-        context_dict['finished_games'] = fg
 
+    # If we are using the filter
+    if request.method == "POST":
+        request.session['role'] = request.POST.get("role")
+        request.session['status'] = request.POST.get("status")
+
+    # Set the default values
+    if 'role' not in request.session:
+        request.session['role'] = 'cat'
+    if 'status' not in request.session:
+        request.session['status'] = 'active'
+
+    # Get the pages for the filter
+    if request.session["role"] == 'cat':
+        if request.session["status"] == 'active':
+            pages = Game.objects.filter(cat_user=user, status=GameStatus.ACTIVE)
+        elif request.session["status"] == 'finished':
+            pages = Game.objects.filter(cat_user=user, status=GameStatus.FINISHED)
+    elif request.session["role"] == 'mouse':
+        if request.session["status"] == 'active':
+            pages = Game.objects.filter(mouse_user=user, status=GameStatus.ACTIVE)
+        elif request.session["status"] == 'finished':
+            pages = Game.objects.filter(mouse_user=user, status=GameStatus.FINISHED)
+
+    # Makes the pages nice and beautifull
+    paginator = Paginator(pages, 5)  # Show 5 games in a page
+    page = request.GET.get('page')
+    games = paginator.get_page(page)
+
+    # fill the context_dict
+    context_dict['games'] = games
+    context_dict['role'] = request.session['role']
+    context_dict['status'] = request.session['status']
+
+    if game_id == -1:
         return render(request, "mouse_cat/select_game.html", context_dict)
 
     # POST in a bad way
