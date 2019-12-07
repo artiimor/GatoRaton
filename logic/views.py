@@ -277,7 +277,7 @@ def move_service(request):
                     Move.objects.create(game=game, player=player,
                                         origin=int(movement.data['origin']),
                                         target=int(movement.data['target']))
-                except(ValidationError):
+                except ValidationError:
                     print("Error: Invalid move")
             else:
                 print("Error: Invalid move")

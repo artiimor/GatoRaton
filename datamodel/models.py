@@ -91,6 +91,8 @@ class Game(models.Model):
     def mouse_alternatives(self):
         alternatives = []
         m = self.mouse
+        print("MOUSE")
+        print(m)
         # alternatives in the four directions, if they are valid
         if self.cell_is_valid(m-9):
             alternatives.append(m-9)
@@ -98,13 +100,19 @@ class Game(models.Model):
             alternatives.append(m-7)
         if self.cell_is_valid(m+7):
             alternatives.append(m+7)
-        if self.cell_is_valid(m+7):
+        if self.cell_is_valid(m+9):
             alternatives.append(m+9)
+        print("ALTERNATIVAS")
+        print(alternatives)
         return alternatives
 
     def mouse_is_trapped(self):
-        for target in self.mouse_alternatives():
-            if target not in self.get_cat_positions():
+        print("POSICIONES GATOS: ")
+        print(self.get_cat_positions())
+        print("ALTERNATIVAS RATON: ")
+        print(self.mouse_alternatives())
+        for aux in self.mouse_alternatives():
+            if aux not in self.get_cat_positions():
                 return False
         self.status = GameStatus.FINISHED
         self.cat_wins = True
