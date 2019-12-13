@@ -2,127 +2,80 @@
 
 {% block content %}
 <div id="container">
-    <div class="searchGame">
-        <h1>Join A New Game:</h1>
-        <div class="joinbtn" style="margin-bottom: 0"><a href="{% url 'create_game' %}">PLAY AS CATS</a></div>
-        <div class="joinbtn" style="margin-bottom: 0"><a href="{% url 'join_game' %}">PLAY AS MOUSE</a></div>
+    <div>
+        <h1 style="margin-bottom: 10px;">Join A New Game:</h1>
+        <div class="joinbtn" style="margin-bottom: 0px; margin-top: 0px;"><a href="{% url 'create_game' %}">PLAY AS CATS</a></div>
+        <div class="joinbtn" style="margin-bottom: 0px; margin-top: 0px;"><a href="{% url 'join_game' %}">PLAY AS MOUSE</a></div>
     </div>
+    <br><br><br>
+    <h1>My Games:</h1>
     <div class="searchGame">
         <form method="post" action="{% url 'select_game' %}">
             {% csrf_token %}
-            <h1>Select a Game:</h1>
-            <br>
-            <div class="radioform">
-                <p>role:</p>
-                <input type="radio" name="role" value="cat" checked="checked"> cat<br>
-                <input type="radio" name="role" value="mouse"> mouse<br>
-            </div>
-
-            <div class="radioform">
-                <p>Status:</p>
-                <input type="radio" name="status" value="active" checked="checked"> active<br>
-                <input type="radio" name="status" value="finished"> finished<br>
-            </div>
-            <br><br><br>
-            <input type="submit" value="Submit">
+            <select name="role">
+                <option value="all" {% if role == "all" %} selected {% endif %}>---</option>
+                <option value="cat" {% if role == "cat" %} selected {% endif %}>as cats</option>
+                <option value="mouse" {% if role == "mouse" %} selected {% endif %}>as mouse</option>
+            </select>
+            <select name="status">
+                <option value="all" {% if status == "all" %} selected {% endif %}>---</option>
+                <option value="active" {% if status == "active" %} selected {% endif %}>active</option>
+                <option value="finished" {% if status == "finished" %} selected {% endif %}>finished</option>
+            </select>
+            <input type="submit" value="Filter" id="filterbtn">
         </form>
     </div>
-
     {% if games %}
-    {% if status == 'finished' %}
-    {% if role == 'cat' %}
-    <h1><br>Finished Games as cat:</h1>
-    {% endif %}
-    {% if role == 'mouse' %}
-    <h1><br>Finished Games as mouse:</h1>
-    {% endif %}
-        <table id="finished_games_table" class="games_table">
-          <th></th><th>Cat</th><th>Mouse</th><th>W/L</th><th></th>
-          {% for game in games %}
-          <tr>
-            <td>{{game.id}}</td>
-            <td>{{game.cat_user}}</td>
-            <td>{{game.mouse_user}}</td>
-            <td>
-              {% if game.cat_user.id == request.user.id and game.cat_wins %}
-              <p style="color: #4CAF50;">W</p>
-              {% elif game.mouse_user.id == request.user.id and not game.cat_wins %}
-              <p style="color: #4CAF50;">W</p>
-              {% else %}
-              <p style="color: #F44336;">L</p>
-              {% endif %}
-            </td>
-            <td><a href="{% url 'select_game' game.id %}"><i class="fa fa-play-circle" style="font-size:24px"></i></a></td>
-          </tr>
-          {% endfor %}
+    <table class="games_table">
+      <th>#</th><th>Cat</th><th>Mouse</th><th></th><th></th>
+      {% for game in games %}
+      <tr>
+        <td>{{game.id}}</td>
+        <td>{{game.cat_user}}</td>
+        <td>{{game.mouse_user}}</td>
 
-        </table>
+        {% if game.status == 2 %}
+        <td>
+          {% if game.cat_user.id == request.user.id and game.cat_wins %}
+          <p style="color: #4CAF50;">WON</p>
+          {% elif game.mouse_user.id == request.user.id and not game.cat_wins %}
+          <p style="color: #4CAF50;">WON</p>
+          {% else %}
+          <p style="color: #F44336;">LOST</p>
+          {% endif %}
+        </td>
+        {% else %}
+            {% if game.cat_user.id == request.user.id %}
+            <td>{% if not game.cat_turn %} Wait... {% else %} Play! {% endif %}</td>
+            {% elif game.mouse_user.id == request.user.id %}
+            <td>{% if game.cat_turn %} Wait... {% else %} Play! {% endif %}</td>
+            {% endif %}
+        {% endif %}
+        <td><a href="{% url 'select_game' game.id %}"><i class="fa fa-play-circle" style="font-size:24px"></i></a></td>
+      </tr>
+      {% endfor %}
+    </table>
+
     <div class="pagination">
         <span class="step-links">
             {% if games.has_previous %}
-                <a href="?page=1">&laquo; first</a>
-                <a href="?page={{ games.previous_page_number }}">previous</a>
+            <a href="?page=1">&laquo;</a>
+            <a href="?page={{ games.previous_page_number }}">&lsaquo;</a>
+            {% else %}<a>&nbsp;</a><a>&nbsp;</a>
             {% endif %}
-
-            <span class="current">
-                Page {{ games.number }} of {{ games.paginator.num_pages }}.
-            </span>
-
+            <span class="current">&nbsp;Page {{ games.number }} of {{ games.paginator.num_pages }}&nbsp;</span>
             {% if games.has_next %}
-                <a href="?page={{ games.next_page_number }}">next</a>
-                <a href="?page={{ games.paginator.num_pages }}">last &raquo;</a>
+            <a href="?page={{ games.next_page_number }}">&rsaquo;</a>
+            <a href="?page={{ games.paginator.num_pages }}">&raquo;</a>
+            {% else %}<a>&nbsp;</a><a>&nbsp;</a>
             {% endif %}
         </span>
     </div>
-
-    {%endif%}
-
-    {% if status == 'active'%}
-    <h1><br>active Games as {{ role }}:<br></h1>
-    <table id="active_games_table" class="games_table">
-          <th>#</th><th>Cat</th><th>Mouse</th><th>Turn</th><th></th>
-          {% if role == 'cat' %}{% for game in games %}
-            <tr>
-              <td>{{game.id}}</td>
-              <td>{{game.cat_user}}</td>
-              <td>{{game.mouse_user}}</td>
-              <td>{% if not game.cat_turn %} Waiting... {% else %} Play now! {% endif %}</td>
-              <td><a href="{% url 'select_game' game.id %}"><i class="fa fa-play-circle" style="font-size:24px"></i></a></td>
-            </tr>
-          {% endfor %}{% endif %}
-          {% if role == 'mouse' %}{% for game in games %}
-            <tr>
-              <td>{{game.id}}</td>
-              <td>{{game.cat_user}}</td>
-              <td>{{game.mouse_user}}</td>
-              <td>{% if game.cat_turn %} Waiting... {% else %} Play now! {% endif %}</td>
-              <td><a href="{% url 'select_game' game.id %}"><i class="fa fa-play-circle" style="font-size:24px"></i></a></td>
-            </tr>
-          {% endfor %}{% endif %}
-        </table>
-    <div class="pagination">
-        <span class="step-links">
-            {% if games.has_previous %}
-                <a href="?page=1">&laquo; first</a>
-                <a href="?page={{ games.previous_page_number }}">previous</a>
-            {% endif %}
-
-            <span class="current">
-                Page {{ games.number }} of {{ games.paginator.num_pages }}.
-            </span>
-
-            {% if games.has_next %}
-                <a href="?page={{ games.next_page_number }}">next</a>
-                <a href="?page={{ games.paginator.num_pages }}">last &raquo;</a>
-            {% endif %}
-        </span>
-    </div>
-    {% endif %}
     {% else %}
-    <h1><br>There isn't any {{status}} games as {{ role }} :(</h1>
+    <table class="games_table">
+      <th>#</th><th>Cat</th><th>Mouse</th><th></th><th></th>
+      <tr><td>-</td><td>-</td><td>-</td><td>-</td><td>-</td></tr>
+    </table>
     {% endif %}
 </div>
-
-
-
 {% endblock content %}

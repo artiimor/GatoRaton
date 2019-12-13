@@ -144,23 +144,31 @@ def select_game_service(request, game_id=-1):
 
     # Set the default values
     if 'role' not in request.session:
-        request.session['role'] = 'cat'
+        request.session['role'] = 'all'
     if 'status' not in request.session:
-        request.session['status'] = 'active'
+        request.session['status'] = 'all'
 
     # Get the pages for the filter
+    pages = []
     if request.session["role"] == 'cat':
-        if request.session["status"] == 'active':
-            pages = Game.objects.filter(cat_user=user, status=GameStatus.ACTIVE)
-        elif request.session["status"] == 'finished':
-            pages = Game.objects.filter(cat_user=user, status=GameStatus.FINISHED)
+        if request.session["status"] == 'active' or request.session["status"] == 'all':
+            pages += Game.objects.filter(cat_user=user, status=GameStatus.ACTIVE)
+        if request.session["status"] == 'finished' or request.session["status"] == 'all':
+            pages += Game.objects.filter(cat_user=user, status=GameStatus.FINISHED)
     elif request.session["role"] == 'mouse':
-        if request.session["status"] == 'active':
-            pages = Game.objects.filter(mouse_user=user, status=GameStatus.ACTIVE)
-        elif request.session["status"] == 'finished':
-            pages = Game.objects.filter(mouse_user=user, status=GameStatus.FINISHED)
+        if request.session["status"] == 'active' or request.session["status"] == 'all':
+            pages += Game.objects.filter(mouse_user=user, status=GameStatus.ACTIVE)
+        if request.session["status"] == 'finished' or request.session["status"] == 'all':
+            pages += Game.objects.filter(mouse_user=user, status=GameStatus.FINISHED)
+    else:
+        if request.session["status"] == 'active' or request.session["status"] == 'all':
+            pages += Game.objects.filter(cat_user=user, status=GameStatus.ACTIVE)
+            pages += Game.objects.filter(mouse_user=user, status=GameStatus.ACTIVE)
+        if request.session["status"] == 'finished' or request.session["status"] == 'all':
+            pages += Game.objects.filter(cat_user=user, status=GameStatus.FINISHED)
+            pages += Game.objects.filter(mouse_user=user, status=GameStatus.FINISHED)
 
-    # Makes the pages nice and beautifull
+    # Makes the pages nice and beautiful
     paginator = Paginator(pages, 5)  # Show 5 games in a page
     page = request.GET.get('page')
     games = paginator.get_page(page)
