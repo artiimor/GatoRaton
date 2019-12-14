@@ -4,7 +4,7 @@ Task for Project of SI in UAM, Spain.
 ## Built with
 
 * [Django](https://www.djangoproject.com/) - For the main structure
-* [Django](https://www.heroku.com/) - For displaying the site
+* [Heroku](https://www.heroku.com/) - For displaying the site
 
 ## Developers
 
